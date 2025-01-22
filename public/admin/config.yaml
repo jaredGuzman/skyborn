@@ -3,7 +3,7 @@ backend:
   repo: jaredGuzman/skyborn
   branch: main
 
-media_folder: "public/image/uploads" # Location where files will be stored in the repo
+media_folder: public/image/uploads # Location where files will be stored in the repo
 
 collections:
   - name: "blog" # Used in routes, e.g., /admin/collections/blog
