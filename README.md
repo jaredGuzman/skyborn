@@ -20,3 +20,7 @@ You can get in contact with us via the site or by contacting us through our stud
 A big thank you to all of those whos technology we're building this project on top of. If you'd like to support us, you can buy us a coffee!
 
 [![buymeacoffee-button](/public/buy-me-a-coffee.png)](https://buymeacoffee.com/skybornstudios)
+
+
+
+markdown-page, mdx-page, accessible-components
