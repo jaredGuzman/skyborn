@@ -2,7 +2,7 @@ backend:
   name: github
   repo: jaredGuzman/skyborn
   branch: main
-  base_url: sveltia-cms-auth.skybornstudios-devs.workers.dev
+  base_url: https://sveltia-cms-auth.skybornstudios-devs.workers.dev/
 
 media_folder: public/image/uploads # Location where files will be stored in the repo
 
