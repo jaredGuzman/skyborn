@@ -5,52 +5,114 @@
 @use 'breakpoint' as *;
 
 @font-face {
-  font-family: 'Open Sans';
-  src:
-    local('Open Sans ExtraBold'),
-    local('OpenSans-ExtraBold'),
-    url('/fonts/OpenSans-ExtraBold.woff2') format('woff2'),
-    url('/fonts/OpenSans-ExtraBold.woff') format('woff');
+  font-family: 'Lato';
+  src: url('Lato-Black.woff2') format('woff2'),
+      url('Lato-Black.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('Lato-BlackItalic.woff2') format('woff2'),
+      url('Lato-BlackItalic.woff') format('woff');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('Lato-Regular.woff2') format('woff2'),
+      url('Lato-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('Lato-Light.woff2') format('woff2'),
+      url('Lato-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('Lato-BoldItalic.woff2') format('woff2'),
+      url('Lato-BoldItalic.woff') format('woff');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('Lato-LightItalic.woff2') format('woff2'),
+      url('Lato-LightItalic.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('Lato-Bold.woff2') format('woff2'),
+      url('Lato-Bold.woff') format('woff');
   font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Open Sans';
-  src:
-    local('Open Sans Bold'),
-    local('OpenSans-Bold'),
-    url('/fonts/OpenSans-Bold.woff2') format('woff2'),
-    url('/fonts/OpenSans-Bold.woff') format('woff');
-  font-weight: bold;
+  font-family: 'Lato Hairline';
+  src: url('Lato-Hairline.woff2') format('woff2'),
+      url('Lato-Hairline.woff') format('woff');
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Open Sans';
-  src:
-    local('Open Sans Italic'),
-    local('OpenSans-Italic'),
-    url('/fonts/OpenSans-Italic.woff2') format('woff2'),
-    url('/fonts/OpenSans-Italic.woff') format('woff');
+  font-family: 'Lato';
+  src: url('Lato-Italic.woff2') format('woff2'),
+      url('Lato-Italic.woff') format('woff');
   font-weight: normal;
   font-style: italic;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Open Sans';
-  src:
-    local('Open Sans Regular'),
-    local('OpenSans-Regular'),
-    url('/fonts/OpenSans-Regular.woff2') format('woff2'),
-    url('/fonts/OpenSans-Regular.woff') format('woff');
+  font-family: 'Lato Hairline';
+  src: url('Lato-HairlineItalic.woff2') format('woff2'),
+      url('Lato-HairlineItalic.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sorts Mill Goudy';
+  src: url('SortsMillGoudy-Italic.woff2') format('woff2'),
+      url('SortsMillGoudy-Italic.woff') format('woff');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sorts Mill Goudy';
+  src: url('SortsMillGoudy-Regular.woff2') format('woff2'),
+      url('SortsMillGoudy-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
+
+
 
 body {
   font-family: var(--font-family-default);
@@ -90,6 +152,7 @@ body {
   h1,
   h2 {
     font-weight: 800;
+    font-family: var(--font-family-special);
   }
 
   h3,
@@ -97,6 +160,7 @@ body {
   h5,
   h6 {
     font-weight: 600;
+    font-family: var(--font-family-special);
   }
 
   h1 {

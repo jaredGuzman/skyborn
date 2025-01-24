@@ -7,7 +7,7 @@ import Footer from '../components/Footer.astro'
 
 const {
   title = 'Skyborn Studios',
-  description = 'A starter project with accessibility features using Astro static site builder. Contains accessible landmarks, skip links, a dark mode color scheme, better focus outline and keyboard menu navigation.',
+  description = 'The main website for the Skyborn Gamedev Studios',
   url,
   image = '/social-preview-image.png',
   author = 'Jared Guzman',
@@ -46,8 +46,8 @@ const {
         --radius-large: 6px;
         --gap-default: 2rem;
         --font-measure: 70ch;
-        --font-family-default: 'Open Sans', sans-serif;
-        --font-family-special: 'Open Sans', sans-serif;
+        --font-family-default: 'Lato', sans-serif;
+        --font-family-special: 'Sorts Mill Goudy', serif;
         // light theme
         --font-color: var(--neutral-900);
         --action-color: var(--primary-300);
@@ -55,6 +55,8 @@ const {
         --background: var(--neutral-100);
         --primary-background: var(--primary-100);
         --neutral-background: var(--neutral-200);
+        --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-duration: 0.3s;
       }
 
       // dark color scheme overrides
@@ -87,12 +89,29 @@ const {
         footer {
           flex-shrink: 0;
         }
+
+        transition: background-color var(--transition-duration) var(--transition-timing);
+        *:not(button) {
+          transition: background-color var(--transition-duration) var(--transition-timing);
+        }
+
+        pre {
+          transition: 
+            border-color var(--transition-duration) var(--transition-timing),
+            background-color var(--transition-duration) var(--transition-timing);
+        }
+
+        will-change: background-color, color;
       }
 
       pre {
         padding: 1rem;
         border-radius: 0.35rem;
         border: 2px solid var(--action-color);
+      }
+
+      pre, .darkmode {
+        will-change: transform;
       }
 
       body .pagination a {

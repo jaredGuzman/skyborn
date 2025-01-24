@@ -1,13 +1,143 @@
 ---
+import ThemeToggle from "./ThemeToggle.astro"
 const currentYear = new Date().getFullYear()
 ---
 
-<footer>
-  <section class="py-8">
-    <div class="container">
-      <p>
-        &copy; Skyborn Studios - Copyright {currentYear}. Made with ❤️ by Jared Guzman.
-      </p>
+<footer class="inset-shadow-md">
+  <div class="container">
+
+    <!-- Footer Columns -->
+    <div class="footer-content">
+      <div class="company-info">
+        <h3>Skyborn Studios</h3>
+        <p>Independent game development studio crafting immersive experiences.</p>
+      </div>
+
+      <nav class="footer-nav">
+        <div class="nav-column">
+          <h3>Company</h3>
+          <ul>
+            <li><a href="/about">About Us</a></li>
+            <li><a href="/games">Our Games</a></li>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="/careers">Careers</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-column">
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="/press">Press Kit</a></li>
+            <li><a href="/support">Support</a></li>
+            <li><a href="/privacy">Privacy Policy</a></li>
+            <li><a href="/terms">Terms of Service</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-column">
+          <h3>Contact</h3>
+          <ul>
+            <li>contact@skyborn.com</li>
+            <li>Discord Community</li>
+          </ul>
+        </div>
+      </nav>
     </div>
-  </section>
+
+    <div class="dark-mode">
+      <ThemeToggle />
+      </div>
+    <!-- Copyright -->
+    <div class="copyright">
+      <p>&copy; {currentYear} Skyborn Studios. All rights reserved.</p>
+    </div>
+  </div>
 </footer>
+
+<style lang="scss" is:global>
+  @use '../assets/scss/base/breakpoint' as *;
+  @use '../assets/scss/base/outline' as *;
+
+  footer {
+  padding: 4rem 0 2rem 0;
+  background: var(--background);
+  
+  .container {
+    max-width: var(--container-max-width, 1200px);
+    margin: 0 auto;
+    padding-left: 4rem;
+    padding-right: 4rem;
+    padding-bottom: 0 var(--container-padding, 1rem);
+    padding-top: 0 var(--container-padding, 1rem);
+  }
+
+  .footer-content {
+    display: grid;
+    gap: 3rem;
+    
+    @include breakpoint(medium) {
+      grid-template-columns: 1fr 2fr;
+    }
+
+    .company-info {
+      h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+      }
+      
+      p {
+        max-width: 25ch;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .footer-nav {
+    display: grid;
+    gap: 2rem;
+    
+    @include breakpoint(medium) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .nav-column {
+      h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        
+        li {
+          margin-bottom: 0.5rem;
+
+          a {
+            opacity: 0.8;
+            transition: opacity 0.2s;
+            
+            &:hover {
+              opacity: 1;
+            }
+          }
+        }
+      }
+    }
+  }
+  .dark-mode {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .copyright {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--neutral-200);
+    text-align: center;
+    opacity: 0.8;
+  }
+}
+</style>

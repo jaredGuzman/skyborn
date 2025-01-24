@@ -1,12 +1,11 @@
 ---
 import ResponsiveToggle from './ResponsiveToggle.astro'
-import { DarkMode } from 'accessible-astro-components'
 import { Image } from 'astro:assets'
 import logo from '../assets/img/logo.svg'
 ---
 
-<div id="main-navigation" class="is-desktop py-8">
-  <div class="container">
+<div id="main-navigation" class="is-desktop py-4">
+  <div class="container fixed">
     <a href="/" class="flex items-center gap-2 !no-underline">
       <!-- <Image src={logo} alt="Your Logo" width="47" height="37" /> -->
       <span class="font-bold">Skyborn Studios</span>
@@ -17,7 +16,6 @@ import logo from '../assets/img/logo.svg'
           <slot />
         </ul>
       </nav>
-      <DarkMode />
       <ResponsiveToggle />
     </div>
     <nav class="mobile-menu" aria-label="Main navigation mobile">
@@ -221,6 +219,14 @@ import logo from '../assets/img/logo.svg'
   @use '../assets/scss/base/outline' as *;
 
   #main-navigation {
+    height: 3.5rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--background);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     > .container {
       display: flex;
       justify-content: space-between;
@@ -280,7 +286,7 @@ import logo from '../assets/img/logo.svg'
         a,
         button {
           text-decoration: none;
-          font-size: 1.125rem;
+          font-size: 0.9rem;
           line-height: 1.6875rem;
         }
 
