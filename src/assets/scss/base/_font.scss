@@ -95,20 +95,20 @@
 }
 
 @font-face {
-  font-family: 'Sorts Mill Goudy';
-  src: url('SortsMillGoudy-Italic.woff2') format('woff2'),
-      url('SortsMillGoudy-Italic.woff') format('woff');
+  font-family: 'Literata Normal';
+  src: url('Literata-VariableFont_opsz,wght.woff2') format('woff2'),
+      url('Literata-VariableFont_opsz,wght.woff') format('woff');
   font-weight: normal;
-  font-style: italic;
+  font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Sorts Mill Goudy';
-  src: url('SortsMillGoudy-Regular.woff2') format('woff2'),
-      url('SortsMillGoudy-Regular.woff') format('woff');
+  font-family: 'Literata Italic';
+  src: url('Literata-Italic-VariableFont_opsz,wght.woff2') format('woff2'),
+      url('Literata-Italic-VariableFont_opsz,wght.woff') format('woff');
   font-weight: normal;
-  font-style: normal;
+  font-style: italic;
   font-display: swap;
 }
 
