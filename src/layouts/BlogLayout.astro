@@ -1,0 +1,24 @@
+---
+import DefaultLayout from './DefaultLayout.astro';
+
+const { title, description, date, url, image, isPost = false } = Astro.props;
+---
+
+<DefaultLayout title={title}>
+  <article class="container">
+    {isPost && <div>
+      {image && (
+        <img 
+          src={image} 
+          alt={title}
+          class="w-full h-64 object-cover mb-8"
+        />
+      )}
+      <h1>{title}</h1>
+      {date ? <time datetime={date}>{new Date(date).toLocaleDateString()}</time> : "No date"}
+    </div>}
+    {!isPost && <div class="prose mt-8">
+      <slot />
+    </div>}
+  </article>
+</DefaultLayout>
