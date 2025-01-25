@@ -6,14 +6,16 @@ export async function getStaticPaths() {
   const posts = await Astro.glob('../../content/blog/*.md');
   
   return posts.map((post: any) => {
+    const slug = post.frontmatter.slug || post.file.split('/').pop().replace('.md', '');
     return {
-      params: { post: post.file.split('/').pop().replace('.md', '') },
+      params: { post: slug },
       props: { 
         post: {
           title: post.frontmatter.title,
           date: post.frontmatter.date,
           thumbnail: post.frontmatter.thumbnail,
-          content: post.compiledContent()
+          content: post.compiledContent(),
+          slug: slug
         }
       },
     }

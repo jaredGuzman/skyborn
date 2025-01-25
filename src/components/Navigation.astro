@@ -30,15 +30,15 @@ import logo from '../assets/img/logo.svg'
   document.addEventListener('astro:page-load', () => {
     // variables
     const mainNav = document.querySelector('#main-navigation')
-    const mainMenu = mainNav.querySelector('ul')
+    const mainMenu = mainNav?.querySelector('ul')
     const dropdownMenus = [...document.querySelectorAll('.has-dropdown button')]
 
     // functions
     const setActiveMenuItem = () => {
-      const mobileDesktopMenus = mainNav.querySelectorAll('nav > ul')
+      const mobileDesktopMenus = mainNav?.querySelectorAll('nav > ul')
       const currenPathname = window.location.pathname
 
-      mobileDesktopMenus.forEach((menu) => {
+      mobileDesktopMenus?.forEach((menu) => {
         const menuItems = [...menu.querySelectorAll('a:not([rel*="external"])')] as HTMLAnchorElement[]
 
         menuItems.forEach((menuItem) => {
@@ -54,17 +54,17 @@ import logo from '../assets/img/logo.svg'
     }
 
     const checkMenuSize = () => {
-      const mainNavWidth = mainNav.getBoundingClientRect().width
-      const desktopMenuWidth = document.querySelector('.desktop-menu').getBoundingClientRect().width
+      const mainNavWidth = mainNav?.getBoundingClientRect().width
+      const desktopMenuWidth = document.querySelector('.desktop-menu')?.getBoundingClientRect().width
       const logoWidthBuffer = 300
-      const totalMenuWidth = Math.round(desktopMenuWidth) + logoWidthBuffer
+      const totalMenuWidth = Math.round(desktopMenuWidth ?? 0) + logoWidthBuffer
 
-      if (totalMenuWidth >= mainNavWidth) {
-        mainNav.classList.remove('is-desktop')
-        mainNav.classList.add('is-mobile')
-      } else if (totalMenuWidth <= mainNavWidth) {
-        mainNav.classList.add('is-desktop')
-        mainNav.classList.remove('is-mobile')
+      if (mainNavWidth ? ( totalMenuWidth >= mainNavWidth) : true) {
+        mainNav?.classList.remove('is-desktop')
+        mainNav?.classList.add('is-mobile')
+      } else if (mainNavWidth && totalMenuWidth <= mainNavWidth) {
+        mainNav?.classList.add('is-desktop')
+        mainNav?.classList.remove('is-mobile')
       }
     }
 
@@ -118,7 +118,7 @@ import logo from '../assets/img/logo.svg'
         let targetItem
 
         if (key === 'ArrowRight') {
-          if (menuItems.indexOf(currentMenuItem) === menuItems.length - 1) {
+          if (currentMenuItem && menuItems.indexOf(currentMenuItem) === menuItems.length - 1) {
             targetItem = menuItems[0]
           } else {
             targetItem = menuItems[currentIndex + 1]
@@ -126,7 +126,7 @@ import logo from '../assets/img/logo.svg'
         }
 
         if (key === 'ArrowLeft') {
-          if (menuItems.indexOf(currentMenuItem) === 0) {
+          if (currentMenuItem && menuItems.indexOf(currentMenuItem) === 0) {
             targetItem = menuItems[menuItems.length - 1]
           } else {
             targetItem = menuItems[currentIndex - 1]
@@ -138,7 +138,7 @@ import logo from '../assets/img/logo.svg'
         }
 
         if (currentDropdownMenu) {
-          const firstDropdownItem = currentDropdownMenu.nextElementSibling.querySelector('li')
+          const firstDropdownItem = currentDropdownMenu.nextElementSibling?.querySelector('li')
 
           if (key === 'ArrowDown') {
             event.preventDefault()
@@ -153,7 +153,7 @@ import logo from '../assets/img/logo.svg'
 
         if (currentDropdownMenuItem) {
           const currentDropdownList = currentDropdownMenuItem.parentNode
-          const dropdownMenuItems = [...currentDropdownList.querySelectorAll('li')]
+          const dropdownMenuItems = currentDropdownList ? [...currentDropdownList.querySelectorAll('li')] : []
           const currentIndex = dropdownMenuItems.findIndex((item) => item === currentDropdownMenuItem)
 
           if (key === 'ArrowDown') {
@@ -178,7 +178,7 @@ import logo from '../assets/img/logo.svg'
 
           if (key === 'Escape') {
             const currentDropdownMenu = (currentDropdownList as Element).previousElementSibling
-            targetItem = currentDropdownMenu.parentNode
+            targetItem = currentDropdownMenu?.parentNode
             closeAllDropdownMenus()
           }
 
