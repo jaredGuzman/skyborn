@@ -30,7 +30,7 @@ import logo from '../assets/img/logo.svg'
   document.addEventListener('astro:page-load', () => {
     // variables
     const mainNav = document.querySelector('#main-navigation')
-    const mainMenu = mainNav?.querySelector('ul')
+    const mainMenu = mainNav.querySelector('ul')
     const dropdownMenus = [...document.querySelectorAll('.has-dropdown button')]
 
     // functions
@@ -59,7 +59,7 @@ import logo from '../assets/img/logo.svg'
       const logoWidthBuffer = 300
       const totalMenuWidth = Math.round(desktopMenuWidth ?? 0) + logoWidthBuffer
 
-      if (mainNavWidth ? ( totalMenuWidth >= mainNavWidth) : true) {
+      if (mainNavWidth ? totalMenuWidth >= mainNavWidth : true) {
         mainNav?.classList.remove('is-desktop')
         mainNav?.classList.add('is-mobile')
       } else if (mainNavWidth && totalMenuWidth <= mainNavWidth) {

@@ -1,47 +1,146 @@
 ---
-import { Icon } from 'astro-icon/components'
 
-const { src = '/astronaut-hero-img.webp' } = Astro.props
 ---
 
-<section class="hero my-24">
-  <div class="container">
-    <div class="grid grid-cols-1 items-center gap-24 lg:grid-cols-2">
-      <div class="flex flex-col items-center gap-8 md:items-start">
-        <h1 class="text-center text-6xl md:text-left lg:text-8xl">
-          <slot><span class="text-gradient">Accessible</span> Starter for Astro</slot>
-        </h1>
-        <div class="flex flex-col gap-3 min-[500px]:flex-row">
-          <a class="button has-icon" href="https://github.com/markteekman/accessible-astro-starter">
-            <Icon name="ion:star-outline" />
-            Star on GitHub
-          </a>
-          <a
-            class="button has-icon color-secondary"
-            href="https://github.com/markteekman/accessible-astro-starter/blob/main/README.md"
-          >
-            <Icon name="ion:bookmark-outline" />
-            Read the Docs
-          </a>
-        </div>
-      </div>
-      <img class="hidden lg:block" src={src} alt="" decoding="async" />
-    </div>
+<section class="hero relative flex h-[60vh] items-center justify-center">
+  <canvas id="gridCanvas" class="h-full w-full"></canvas>
+  <div class="pointer-events-none absolute text-center">
+    <span class="text-3xl font-bold">Feeling</span>
+    <h6 id="rotating-text" class="ml-2 inline-block w-[200px] text-5xl font-bold">FUN</h6>
   </div>
 </section>
 
-<style lang="scss">
-  .text-gradient {
-    background: linear-gradient(315deg, var(--primary-200) 25%, var(--secondary-500));
-    background-clip: border-box;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+<script>
+  const words = [
+    'FUN',
+    'CREATIVE',
+    'BOLD',
+    'UNIQUE',
+    'DYNAMIC',
+    'INNOVATIVE',
+    'PLAYFUL',
+    'EXCITING',
+    'FRESH',
+    'MODERN',
+    'VIBRANT',
+    'POWERFUL',
+    'SKILLED',
+    'ARTISTIC',
+    'PASSIONATE',
+  ]
+
+  let currentWordIndex = 0
+  const rotatingText = document.getElementById('rotating-text')
+
+  function rotateWords() {
+    currentWordIndex = (currentWordIndex + 1) % words.length
+    if (rotatingText) {
+      rotatingText.textContent = words[currentWordIndex]
+    }
+
+    // Random delay between 100ms and 2000ms
+    const delay = Math.random() < 0.1 ? 1000 : 100
+    setTimeout(rotateWords, delay)
   }
 
-  :global(.darkmode .text-gradient) {
-    background: linear-gradient(315deg, var(--primary-200) 25%, var(--secondary-400));
-    background-clip: border-box;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  rotateWords()
+
+  const canvas = document.getElementById('gridCanvas') as HTMLCanvasElement
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+
+  const cellSize = 10
+  let rows, cols, grid
+
+  function setupCanvas() {
+    canvas.width = canvas.offsetWidth
+    canvas.height = canvas.offsetHeight
+
+    rows = Math.ceil(canvas.height / cellSize) + 1
+    cols = Math.ceil(canvas.width / cellSize) + 1
+
+    grid = Array(rows)
+      .fill(undefined)
+      .map(() => Array(cols).fill(0))
+
+    drawGrid()
+    animate()
+  }
+
+  function drawGrid() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * cellSize
+        const y = row * cellSize
+
+        if (x < canvas.width && y < canvas.height) {
+          const opacity = grid[row][col]
+          if (opacity > 0) {
+            ctx.fillStyle = `rgba(40, 54, 24, ${opacity * 0.8})` // Updated color and opacity
+            ctx.fillRect(x, y, cellSize - 1, cellSize - 1)
+          }
+        }
+      }
+    }
+  }
+
+  function animate() {
+    let needsUpdate = false
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        if (grid[row][col] > 0) {
+          grid[row][col] -= 0.01 // Slowed down the fade slightly
+          if (grid[row][col] < 0) grid[row][col] = 0
+          needsUpdate = true
+        }
+      }
+    }
+
+    if (needsUpdate) {
+      drawGrid()
+    }
+
+    requestAnimationFrame(animate)
+  }
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+
+    const col = Math.floor(x / cellSize)
+    const row = Math.floor(y / cellSize)
+
+    const radius = 4
+    for (let i = -radius; i <= radius; i++) {
+      for (let j = -radius; j <= radius; j++) {
+        const currentRow = row + i
+        const currentCol = col + j
+
+        if (currentRow >= 0 && currentRow < rows && currentCol >= 0 && currentCol < cols) {
+          const distance = Math.sqrt(i * i + j * j)
+          if (distance <= radius) {
+            const intensity = 1 - distance / radius
+            grid[currentRow][currentCol] = Math.min(grid[currentRow][currentCol] + intensity * 0.4, 1)
+          }
+        }
+      }
+    }
+
+    drawGrid()
+  })
+
+  window.addEventListener('resize', () => {
+    setupCanvas()
+  })
+
+  setupCanvas()
+</script>
+
+<style>
+  canvas {
+    background-color: rgb(251, 248, 241); /* neutral-100 color */
   }
 </style>

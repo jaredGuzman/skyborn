@@ -14,7 +14,7 @@ const {
 } = Astro.props
 ---
 
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" data-page={title.toLowerCase()}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -82,9 +82,18 @@ const {
         background-color: var(--background);
         overflow-x: hidden;
 
-        main {
-          flex: 1 0 auto;
-          padding-top: 4rem;
+        [data-page='home'] & {
+          main {
+            flex: 1 0 auto;
+            padding-top: 3.5rem;
+          }
+        }
+
+        [data-page]:not([data-page='home']) & {
+          main {
+            flex: 1 0 auto;
+            padding-top: 4rem;
+          }
         }
 
         footer {
@@ -97,7 +106,7 @@ const {
         }
 
         pre {
-          transition: 
+          transition:
             border-color var(--transition-duration) var(--transition-timing),
             background-color var(--transition-duration) var(--transition-timing);
         }
@@ -111,7 +120,8 @@ const {
         border: 2px solid var(--action-color);
       }
 
-      pre, .darkmode {
+      pre,
+      .darkmode {
         will-change: transform;
       }
 
@@ -140,4 +150,3 @@ const {
     </style>
   </body>
 </html>
-
