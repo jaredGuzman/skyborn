@@ -4,7 +4,7 @@ import { SkipLinks } from 'accessible-astro-components'
 import { Icon } from 'astro-icon/components'
 ---
 
-<header class="w-full z-20 top-0 start-0 shadow-md">
+<header class="start-0 top-0 z-20 w-full shadow-md">
   <SkipLinks />
   <Navigation>
     <li class="menu-item">
@@ -28,7 +28,12 @@ import { Icon } from 'astro-icon/components'
       </ul>
     </li> -->
     <li class="menu-item">
-      <a href="https://buymeacoffee.com/skybornstudios" title="support us link" target="_blank" rel="external noopener noreferrer">Support Us</a>
+      <a
+        href="https://buymeacoffee.com/skybornstudios"
+        title="support us link"
+        target="_blank"
+        rel="external noopener noreferrer">Support Us</a
+      >
     </li>
   </Navigation>
 </header>

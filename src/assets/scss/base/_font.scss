@@ -114,16 +114,16 @@ body {
   -webkit-font-smoothing: antialiased;
 
   a:not(.button) {
-    color: var(--action-color);
+    color: var(--text-color);
     text-decoration: underline;
 
     &:visited {
-      color: var(--action-color);
+      color: var(--text-color);
     }
 
     &:hover,
     &:focus {
-      color: var(--action-color-state);
+      color: var(--text-color);
       text-decoration: none;
     }
   }

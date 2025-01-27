@@ -13,17 +13,19 @@
     const BOUNCE_VELOCITY = -12
     const BASE_WORD = 'Currently working on cirrus'
     const WORD_DELAY = 100
-    const FADE_RATE = 0.02
+    const FADE_RATE = 0.01
     const ACTIVATION_THRESHOLD = 0.01
     const DEACTIVATION_THRESHOLD = 0
-    const WAVE_SPEED_MULTIPLIER = 0.004
+    const WAVE_SPEED_MULTIPLIER = 0.003
     const RADIUS = 2
-    const MOUSE_RADIUS = 4
+    const MOUSE_RADIUS = 2
     const INTENSITY = 0.4
     const WAVE_PATH_LENGTH = 1000
-    const WAVE_COUNT = 3
-    const WAVE_DELAY = 500
-    const WAVE_PHASE_OFFSET = 150
+
+    let isVisible = true
+    let animationFrameId: number | null = null
+    let lastUpdateTime = performance.now()
+    const FIXED_TIMESTEP = 1000 / 60 // 60 FPS
 
     // DOM Elements with type assertions
     const rotatingText = document.getElementById('rotating-text') as HTMLElement | null
@@ -47,10 +49,18 @@
       { yPos: 0.9, delay: 3000 },
     ]
 
+    let waveStates = WAVES.map(() => ({
+      active: false,
+      progress: 0,
+      lastActivation: 0,
+      velocityY: 0,
+      waveOffset: 0,
+    }))
+
     const WAVE_X_SPACING = 100
     const wavePaths: Array<Array<{ x: number; y: number }>> = []
-    const waveIndices: number[] = []
-    const waveStartTimes: number[] = []
+    let waveIndices: number[] = []
+    let waveStartTimes: number[] = []
     let grid: number[][] = []
     let rows = 0
     let cols = 0
@@ -85,6 +95,24 @@
       markCell(row, col)
     }
 
+    let resizeTimeout: number
+    function handleResize() {
+      cancelAnimationFrame(animationFrameId!)
+      clearTimeout(resizeTimeout)
+      resizeTimeout = window.setTimeout(() => {
+        setupCanvas(true)
+        animate()
+      }, 200)
+    }
+
+    function handleVisibilityChange() {
+      isVisible = !document.hidden
+      if (isVisible) {
+        lastUpdateTime = performance.now()
+        animate()
+      }
+    }
+
     function resizeGrid(newRows: number, newCols: number): void {
       const oldGrid = grid
       grid = Array.from({ length: newRows }, (_, row) =>
@@ -96,12 +124,27 @@
     }
 
     // Wave Simulation
-    function calculateWavePaths(): void {
-      wavePaths.length = 0
-      WAVES.forEach((waveConfig) => {
-        const tempState = { velocityY: 0, waveOffset: 0 }
+    function calculateWavePaths(preserveState = false): void {
+      wavePaths.length = 0 // Reset only if not preserving state
+
+      WAVES.forEach((waveConfig, index) => {
+        // NEW: Get current wave state if preserving
+        const state = preserveState
+          ? waveStates[index]
+          : {
+              velocityY: 0,
+              waveOffset: 0,
+              progress: 0,
+            }
+
+        const tempState = {
+          velocityY: state.velocityY,
+          waveOffset: state.waveOffset,
+        }
+
         const path: Array<{ x: number; y: number }> = []
 
+        // EXISTING PATH CALCULATION LOGIC (unchanged)
         for (let i = 0; i < WAVE_PATH_LENGTH; i++) {
           tempState.velocityY += GRAVITY
           const progress = tempState.waveOffset % (canvas!.width + WAVE_X_SPACING)
@@ -117,7 +160,18 @@
           tempState.waveOffset += canvas!.width * WAVE_SPEED_MULTIPLIER
         }
 
-        wavePaths.push(path)
+        // NEW: Preserve state if requested
+        if (preserveState) {
+          waveStates[index] = {
+            ...waveStates[index],
+            velocityY: tempState.velocityY,
+            waveOffset: tempState.waveOffset,
+            progress: waveIndices[index] / WAVE_PATH_LENGTH,
+          }
+          wavePaths[index] = path
+        } else {
+          wavePaths.push(path)
+        }
       })
     }
 
@@ -241,9 +295,19 @@
     }
 
     // Setup
-    function setupCanvas(): void {
+    function setupCanvas(preserveWaveState = false): void {
       if (!canvas) return
 
+      // NEW: Capture current progress before resize
+      const previousStates = preserveWaveState
+        ? waveStates.map((state, index) => ({
+            progress: waveIndices[index] / WAVE_PATH_LENGTH,
+            velocityY: state.velocityY,
+            waveOffset: state.waveOffset,
+          }))
+        : null
+
+      // EXISTING RESIZE LOGIC (unchanged)
       canvas.width = canvas.offsetWidth
       canvas.height = canvas.offsetHeight
 
@@ -256,25 +320,53 @@
         cols = newCols
       }
 
-      calculateWavePaths()
-      waveIndices.length = 0
-      waveIndices.push(...Array(WAVES.length).fill(0))
-      const now = performance.now()
-      waveStartTimes.length = 0
-      waveStartTimes.push(...WAVES.map((wave) => now + wave.delay))
+      // MODIFIED: Conditional wave path calculation
+      if (preserveWaveState && previousStates) {
+        // Recalculate paths while maintaining state
+        calculateWavePaths(true)
+
+        // Restore previous progress
+        previousStates.forEach((state, index) => {
+          waveIndices[index] = Math.floor(state.progress * WAVE_PATH_LENGTH)
+          waveStates[index] = {
+            ...waveStates[index],
+            velocityY: state.velocityY,
+            waveOffset: state.waveOffset,
+          }
+        })
+      } else {
+        // Initial calculation
+        calculateWavePaths()
+        waveIndices = Array(WAVES.length).fill(0)
+        const now = performance.now()
+        waveStartTimes = WAVES.map((wave) => now + wave.delay)
+      }
     }
 
     function init(): void {
       if (typeof window === 'undefined') return
 
+      // 1. Original initialization code
       rotateWords()
       setupCanvas()
-      window.addEventListener('resize', setupCanvas)
+
+      // 2. Original mouse listener (unchanged)
       canvas?.addEventListener('mousemove', (e: MouseEvent) => {
-        const rect = canvas.getBoundingClientRect()
+        const rect = canvas!.getBoundingClientRect()
         mouseQueue.push([e.clientX - rect.left, e.clientY - rect.top])
       })
-      animate()
+
+      // 3. NEW: Visibility and lifecycle event handlers
+      document.addEventListener('visibilitychange', handleVisibilityChange)
+      window.addEventListener('pagehide', () => (isVisible = false))
+      window.addEventListener('pageshow', () => (isVisible = true))
+
+      // 4. MODIFIED: Resize handler (was previously window.addEventListener('resize', setupCanvas))
+      window.addEventListener('resize', handleResize)
+
+      // 5. Original animation start (unchanged but now using animationFrameId)
+      lastUpdateTime = performance.now()
+      animationFrameId = requestAnimationFrame(animate)
     }
 
     init()
@@ -283,7 +375,7 @@
 
 <style>
   canvas {
-    background-color: rgb(251, 248, 241);
+    background-color: var(--background);
   }
   /* Keep the previous fade effect CSS */
   .hero::after {
@@ -293,7 +385,7 @@
     left: 0;
     right: 0;
     height: 25%;
-    background: linear-gradient(to bottom, transparent 0%, rgba(251, 248, 241, 1) 100%);
+    background: linear-gradient(to bottom, transparent 0%, var(--background) 100%);
     pointer-events: none;
     z-index: 1;
   }
