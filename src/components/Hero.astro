@@ -3,381 +3,476 @@
   <div class="pointer-events-none absolute text-center">
     <h6 id="rotating-text" class="ml-2 inline-block text-5xl font-bold">FUN</h6>
   </div>
-</section>
 
-<script>
-  ;(function () {
-    // Configuration Constants
-    const CELL_SIZE = 10
-    const GRAVITY = 0.5
-    const BOUNCE_VELOCITY = -12
-    const BASE_WORD = 'Currently working on cirrus'
-    const WORD_DELAY = 100
-    const FADE_RATE = 0.01
-    const ACTIVATION_THRESHOLD = 0.01
-    const DEACTIVATION_THRESHOLD = 0
-    const WAVE_SPEED_MULTIPLIER = 0.003
-    const RADIUS = 2
-    const MOUSE_RADIUS = 2
-    const INTENSITY = 0.4
-    const WAVE_PATH_LENGTH = 1000
-
-    let isVisible = true
-    let animationFrameId: number | null = null
-    let lastUpdateTime = performance.now()
-    const FIXED_TIMESTEP = 1000 / 60 // 60 FPS
-
-    // DOM Elements with type assertions
-    const rotatingText = document.getElementById('rotating-text') as HTMLElement | null
-    const canvas = document.getElementById('gridCanvas') as HTMLCanvasElement | null
-    const ctx = canvas?.getContext('2d')
-
-    // Animation State with type annotations
-    let currentWordIndex = 0
-    const activeCells = new Set<string>()
-    const dirtyCells = new Set<string>()
-    const mouseQueue: Array<[number, number]> = []
-
-    interface WaveConfig {
-      yPos: number
-      delay: number
-    }
-
-    const WAVES: WaveConfig[] = [
-      { yPos: 0.2, delay: 1500 },
-      { yPos: 0.7, delay: 100 },
-      { yPos: 0.9, delay: 3000 },
-    ]
-
-    let waveStates = WAVES.map(() => ({
-      active: false,
-      progress: 0,
-      lastActivation: 0,
-      velocityY: 0,
-      waveOffset: 0,
-    }))
-
-    const WAVE_X_SPACING = 100
-    const wavePaths: Array<Array<{ x: number; y: number }>> = []
-    let waveIndices: number[] = []
-    let waveStartTimes: number[] = []
-    let grid: number[][] = []
-    let rows = 0
-    let cols = 0
-
-    // Word Generation
-    const words = Array.from({ length: BASE_WORD.length }, (_, i) => {
-      const chars = BASE_WORD.toLowerCase().split('')
-      chars[i] = chars[i].toUpperCase()
-      return chars.join('')
-    })
-
-    function rotateWords(): void {
-      if (!rotatingText) return
-
-      currentWordIndex = (currentWordIndex + 1) % words.length
-      rotatingText.textContent = words[currentWordIndex]
-      setTimeout(rotateWords, WORD_DELAY)
-    }
-
-    // Grid Management
-    function markCell(row: number, col: number): void {
-      const key = `${row}|${col}`
-      dirtyCells.add(key)
-      if (grid[row]?.[col] > ACTIVATION_THRESHOLD) {
-        activeCells.add(key)
+  <script is:inline>
+    ;(() => {
+      const CONFIG = {
+        WAVES: [
+          {
+            yPos: 0.2,
+            delay: 17500,
+          },
+          {
+            yPos: 0.7,
+            delay: 100,
+          },
+          {
+            yPos: 0.9,
+            delay: 45000,
+          },
+        ],
+        ANIMATION: {
+          ACTIVATION_THRESHOLD: 0.01,
+          AMPLITUDE: 30,
+          BASE_WAVE_SPEED: 0.02,
+          BASE_WORD: 'Currently working on cirrus',
+          CELL_SIZE: 8,
+          DEACTIVATION_THRESHOLD: 0,
+          FADE_RATE: 0.0005,
+          FPS: 60,
+          MOUSE_INTENSITY: 0.2,
+          WAVE_INTENSITY: 0.04,
+          MAX_WAVE_OFFSET: 100000,
+          MOUSE_RADIUS: 4,
+          NOISE_AMPLITUDE: 40,
+          NOISE_OCTAVES: 2,
+          NOISE_PERSISTENCE: 0.5,
+          NOISE_SCALE: 0.02,
+          RADIUS: 8,
+          SINE_AMPLITUDE: 30,
+          SINE_FREQUENCY: 0.03,
+          WAVE_PATH_LENGTH: 1000,
+          WAVE_SPEED_MULTIPLIER: 0.003,
+          WAVE_X_SPACING: 100,
+          WORD_DELAY: 100,
+        },
       }
-    }
 
-    function updateGridValue(row: number, col: number, value: number): void {
-      if (!grid[row]) return
-      grid[row][col] = value
-      markCell(row, col)
-    }
+      class GridManager {
+        constructor(canvas, config) {
+          this.logicalWidth = 0
+          this.logicalHeight = 0
+          this.canvas = canvas
+          this.config = config
+          this.rows = 0
+          this.cols = 0
+          this.grid = []
+          this.activeCells = new Set()
+          this.dirtyCells = new Set()
+          this.initGrid()
+        }
 
-    let resizeTimeout: number
-    function handleResize() {
-      cancelAnimationFrame(animationFrameId!)
-      clearTimeout(resizeTimeout)
-      resizeTimeout = window.setTimeout(() => {
-        setupCanvas(true)
-        animate()
-      }, 200)
-    }
+        setLogicalSize(width, height) {
+          this.logicalWidth = width
+          this.logicalHeight = height
+        }
 
-    function handleVisibilityChange() {
-      isVisible = !document.hidden
-      if (isVisible) {
-        lastUpdateTime = performance.now()
-        animate()
+        initGrid() {
+          // Calculate based on logical dimensions
+          this.rows = Math.ceil(this.logicalHeight / this.config.ANIMATION.CELL_SIZE) + 1
+          this.cols =
+            Math.ceil((this.logicalWidth + this.config.ANIMATION.WAVE_X_SPACING) / this.config.ANIMATION.CELL_SIZE) + 1
+          this.grid = Array.from({ length: this.rows }, () => Array(this.cols).fill(0))
+        }
+
+        resizeGrid(newRows, newCols) {
+          const oldGrid = this.grid
+          this.grid = Array.from({ length: newRows }, (_, row) =>
+            oldGrid[row]
+              ? [...oldGrid[row].slice(0, newCols), ...Array(Math.max(newCols - oldGrid[row].length, 0)).fill(0)]
+              : Array(newCols).fill(0),
+          )
+        }
+
+        markCellDirty(row, col) {
+          this.dirtyCells.add(`${row}|${col}`)
+          const value = this.grid[row]?.[col] || 0
+          if (value > this.config.ANIMATION.ACTIVATION_THRESHOLD) {
+            this.activeCells.add(`${row}|${col}`)
+          }
+        }
+
+        updateCell(row, col, value) {
+          if (!this.grid[row] || Math.abs(this.grid[row][col] - value) < 0.01) return
+          this.grid[row][col] = value
+          this.markCellDirty(row, col)
+        }
+
+        fadeActiveCells(deltaTime) {
+          const fadeAmount = deltaTime * this.config.ANIMATION.FADE_RATE * (deltaTime / 16.67)
+          const fadedCells = new Set()
+
+          this.activeCells.forEach((key) => {
+            const [row, col] = key.split('|').map(Number)
+            const newValue = Math.max(0, this.grid[row][col] - fadeAmount)
+            this.grid[row][col] = newValue
+            this.markCellDirty(row, col)
+
+            if (newValue <= this.config.ANIMATION.DEACTIVATION_THRESHOLD) {
+              fadedCells.add(key)
+              this.grid[row][col] = 0
+            } else {
+              this.grid[row][col] = newValue
+              this.markCellDirty(row, col)
+            }
+          })
+
+          fadedCells.forEach((key) => this.activeCells.delete(key))
+          return this.activeCells.size > 0
+        }
       }
-    }
 
-    function resizeGrid(newRows: number, newCols: number): void {
-      const oldGrid = grid
-      grid = Array.from({ length: newRows }, (_, row) =>
-        oldGrid[row]
-          ? oldGrid[row].slice(0, newCols).concat(Array(newCols - oldGrid[row].length).fill(0))
-          : Array(newCols).fill(0),
-      )
-      while (grid.length < newRows) grid.push(Array(newCols).fill(0))
-    }
+      class WaveManager {
+        constructor(canvas, config) {
+          this.logicalWidth = 0
+          this.logicalHeight = 0
+          this.canvas = canvas
+          this.config = config
+          this.waveStates = []
+          this.noiseSeeds = []
+          this.initWaves()
+        }
 
-    // Wave Simulation
-    function calculateWavePaths(preserveState = false): void {
-      wavePaths.length = 0 // Reset only if not preserving state
+        setLogicalSize(width, height) {
+          this.logicalWidth = width
+          this.logicalHeight = height
+        }
 
-      WAVES.forEach((waveConfig, index) => {
-        // NEW: Get current wave state if preserving
-        const state = preserveState
-          ? waveStates[index]
-          : {
-              velocityY: 0,
+        initWaves() {
+          this.waveStates = this.config.WAVES.map((wave, index) => {
+            this.noiseSeeds[index] = Math.random() * 1000
+
+            return {
+              amplitude: this.config.ANIMATION.SINE_AMPLITUDE,
+              delay: wave.delay,
+              frequency: this.config.ANIMATION.SINE_FREQUENCY,
+              phase: 0,
               waveOffset: 0,
-              progress: 0,
+              startTime: null,
+              yPos: wave.yPos,
             }
-
-        const tempState = {
-          velocityY: state.velocityY,
-          waveOffset: state.waveOffset,
+          })
         }
 
-        const path: Array<{ x: number; y: number }> = []
+        getNoise(x, seed) {
+          const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10)
+          const lerp = (a, b, t) => a + t * (b - a)
 
-        // EXISTING PATH CALCULATION LOGIC (unchanged)
-        for (let i = 0; i < WAVE_PATH_LENGTH; i++) {
-          tempState.velocityY += GRAVITY
-          const progress = tempState.waveOffset % (canvas!.width + WAVE_X_SPACING)
-          const baseY = canvas!.height * waveConfig.yPos + Math.sin(progress * 0.02) * 30
-          let y = baseY + tempState.velocityY
+          const X = Math.floor(x) & 255
+          const x0 = x - Math.floor(x)
+          const x1 = x0 - 1
 
-          if (y >= baseY) {
-            y = baseY
-            tempState.velocityY = BOUNCE_VELOCITY
+          const grad = (v) => {
+            const h = (Math.sin(v * 987.654 + seed) * 54321.12345) % 1
+            return h * 2 - 1
           }
 
-          path.push({ x: progress, y })
-          tempState.waveOffset += canvas!.width * WAVE_SPEED_MULTIPLIER
+          const g0 = grad(X)
+          const g1 = grad(X + 1)
+
+          return lerp(g0 * x0, g1 * x1, fade(x0))
         }
 
-        // NEW: Preserve state if requested
-        if (preserveState) {
-          waveStates[index] = {
-            ...waveStates[index],
-            velocityY: tempState.velocityY,
-            waveOffset: tempState.waveOffset,
-            progress: waveIndices[index] / WAVE_PATH_LENGTH,
+        getFbmNoise(x, seed) {
+          let total = 0
+          let amplitude = 1
+          let frequency = 1
+          let maxValue = 0
+
+          for (let i = 0; i < this.config.ANIMATION.NOISE_OCTAVES; i++) {
+            total += this.getNoise(x * frequency, seed) * amplitude
+            maxValue += amplitude
+            amplitude *= this.config.ANIMATION.NOISE_PERSISTENCE
+            frequency *= 2
           }
-          wavePaths[index] = path
-        } else {
-          wavePaths.push(path)
+
+          return total / maxValue
         }
-      })
-    }
 
-    function updateWavePositions(): void {
-      const now = performance.now()
+        calculateWavePaths() {
+          this.wavePaths = this.config.WAVES.map((wave, index) => {
+            const path = []
+            let waveOffset = this.waveStates[index].waveOffset
+            const totalTravel = this.canvas.width + this.config.ANIMATION.WAVE_X_SPACING
 
-      wavePaths.forEach((path, index) => {
-        if (now < waveStartTimes[index]) return
+            for (let i = 0; i < Math.ceil(totalTravel / this.config.ANIMATION.BASE_WAVE_SPEED); i++) {
+              const baseY = this.canvas.height * wave.yPos
+              const y =
+                baseY +
+                Math.sin(waveOffset * this.config.ANIMATION.SINE_FREQUENCY) * this.config.ANIMATION.SINE_AMPLITUDE
+              path.push({ x: waveOffset, y })
+              waveOffset = (waveOffset + this.config.ANIMATION.BASE_WAVE_SPEED) % totalTravel
+            }
+            return path
+          })
+        }
 
-        const waveIndex = waveIndices[index]
-        const { x, y } = path[waveIndex % WAVE_PATH_LENGTH]
-        waveIndices[index]++
+        getCurrentWavePositions() {
+          const now = performance.now()
+          return this.waveStates
+            .map((state, index) => {
+              if (state.startTime === null) state.startTime = now + state.delay
+              if (now < state.startTime) return null
 
-        const gridCol = Math.floor(x / CELL_SIZE)
-        const gridRow = Math.floor(y / CELL_SIZE)
+              const elapsed = now - state.startTime
+              const totalTravel = this.logicalWidth + this.config.ANIMATION.WAVE_X_SPACING
+              state.waveOffset = (elapsed * this.config.ANIMATION.BASE_WAVE_SPEED) % totalTravel
 
-        for (let i = -RADIUS; i <= RADIUS; i++) {
-          for (let j = -RADIUS; j <= RADIUS; j++) {
-            const currentRow = gridRow + i
-            const currentCol = gridCol + j
+              const baseY = this.logicalHeight * state.yPos
 
-            if (currentRow >= 0 && currentRow < rows && currentCol >= 0 && currentCol < cols) {
-              const distance = Math.hypot(i, j)
-              if (distance <= RADIUS) {
-                const intensity = 1 - distance / RADIUS
-                const currentValue = grid[currentRow]?.[currentCol] ?? 0
-                const newValue = Math.min(currentValue + intensity * INTENSITY, 1)
-                updateGridValue(currentRow, currentCol, newValue)
+              // Core sine wave
+              const sineY = Math.sin(state.waveOffset * state.frequency) * state.amplitude
+
+              // Noise-based wobble
+              const noiseX = state.waveOffset * this.config.ANIMATION.NOISE_SCALE
+              const noiseY = this.getFbmNoise(noiseX, this.noiseSeeds[index]) * this.config.ANIMATION.NOISE_AMPLITUDE
+
+              const y = baseY + sineY + noiseY
+
+              return {
+                x: state.waveOffset,
+                y: Math.min(Math.max(y, 0), this.logicalHeight),
               }
-            }
+            })
+            .filter(Boolean)
+        }
+      }
+
+      class GridAnimation {
+        constructor() {
+          this.config = CONFIG
+          this.canvas = document.getElementById('gridCanvas')
+          this.ctx = this.canvas?.getContext('2d')
+          this.rotatingText = document.getElementById('rotating-text')
+          this.gridManager = new GridManager(this.canvas, this.config)
+          this.waveManager = new WaveManager(this.canvas, this.config)
+          this.animationState = {
+            isVisible: true,
+            lastUpdate: performance.now(),
+            frameId: null,
+            mouseQueue: [],
           }
-        }
-      })
-    }
-
-    // Rendering
-    function fadeActiveCells(): boolean {
-      const fadedCells = new Set<string>()
-      activeCells.forEach((key) => {
-        const [row, col] = key.split('|').map(Number)
-        const currentValue = grid[row]?.[col] ?? 0
-        const newValue = Math.max(0, currentValue - FADE_RATE)
-
-        if (grid[row]) {
-          grid[row][col] = newValue
-          markCell(row, col)
+          this.setupEventListeners()
+          this.init()
         }
 
-        if (newValue <= DEACTIVATION_THRESHOLD) {
-          fadedCells.add(key)
-          if (grid[row]) grid[row][col] = 0
+        init() {
+          if (!this.canvas || !this.ctx) return
+          this.setupCanvas()
+          this.startAnimation()
+          this.startTextRotation()
         }
-      })
-      fadedCells.forEach((key) => activeCells.delete(key))
-      return activeCells.size > 0
-    }
 
-    function drawDirtyCells(): void {
-      if (!ctx || !canvas) return
+        setupCanvas() {
+          // Ensure canvas dimensions match displayed size
+          const dpr = window.devicePixelRatio || 1
+          const rect = this.canvas.getBoundingClientRect()
 
-      dirtyCells.forEach((key) => {
-        const [row, col] = key.split('|').map(Number)
-        const opacity = grid[row]?.[col] ?? 0
-        const x = col * CELL_SIZE
-        const y = row * CELL_SIZE
+          this.logicalWidth = rect.width
+          this.logicalHeight = rect.height
 
-        if (opacity > 0) {
-          ctx.fillStyle = `rgba(40, 54, 24, ${opacity * 0.8})`
-          ctx.fillRect(x, y, CELL_SIZE - 1, CELL_SIZE - 1)
-        } else {
-          ctx.clearRect(x, y, CELL_SIZE, CELL_SIZE)
+          this.canvas.width = rect.width * dpr
+          this.canvas.height = rect.height * dpr
+          this.ctx.scale(dpr, dpr)
+
+          this.gridManager.setLogicalSize(this.logicalWidth, this.logicalHeight)
+          this.waveManager.setLogicalSize(this.logicalWidth, this.logicalHeight)
+
+          this.gridManager.initGrid()
+          this.waveManager.initWaves()
+          this.draw()
         }
-      })
-      dirtyCells.clear()
-    }
 
-    // Input Handling
-    function processMouseQueue(): void {
-      const processed = new Set<string>()
+        startAnimation() {
+          let lastTime = performance.now()
 
-      mouseQueue.forEach(([x, y]) => {
-        const col = Math.floor(x / CELL_SIZE)
-        const row = Math.floor(y / CELL_SIZE)
-        const key = `${row}|${col}`
+          const animate = (currentTime) => {
+            const deltaTime = currentTime - lastTime
+            lastTime = currentTime
 
-        if (!processed.has(key)) {
-          for (let i = -MOUSE_RADIUS; i <= MOUSE_RADIUS; i++) {
-            for (let j = -MOUSE_RADIUS; j <= MOUSE_RADIUS; j++) {
+            if (this.animationState.isVisible) {
+              this.update(currentTime, deltaTime)
+              this.draw()
+            }
+
+            this.animationState.frameId = requestAnimationFrame(animate)
+          }
+
+          animate(lastTime)
+        }
+
+        update(now) {
+          const deltaTime = now - this.animationState.lastUpdate
+
+          this.processMouseInput()
+          this.updateWaves()
+
+          // Always redraw even if fading to ensure smooth updates
+          const hasActive = this.gridManager.fadeActiveCells(deltaTime)
+          this.draw()
+          this.animationState.lastUpdate = now
+        }
+
+        processMouseInput() {
+          this.animationState.mouseQueue.forEach(([x, y]) => {
+            this.applyRadiusEffect(x, y, this.config.ANIMATION.MOUSE_RADIUS, true)
+          })
+          this.animationState.mouseQueue = []
+        }
+
+        updateWaves() {
+          this.waveManager.getCurrentWavePositions().forEach(({ x, y }) => {
+            this.applyRadiusEffect(x, y, this.config.ANIMATION.RADIUS)
+          })
+        }
+
+        applyRadiusEffect(x, y, radius, isMouse = false) {
+          const cellSize = this.config.ANIMATION.CELL_SIZE
+          const col = Math.floor(x / cellSize)
+          const row = Math.floor(y / cellSize)
+
+          for (let i = -radius; i <= radius; i++) {
+            for (let j = -radius; j <= radius; j++) {
               const currentRow = row + i
               const currentCol = col + j
-
-              if (currentRow >= 0 && currentRow < rows && currentCol >= 0 && currentCol < cols) {
+              if (this.isValidCell(currentRow, currentCol)) {
                 const distance = Math.hypot(i, j)
-                if (distance <= MOUSE_RADIUS) {
-                  const intensity = 1 - distance / MOUSE_RADIUS
-                  const currentValue = grid[currentRow]?.[currentCol] ?? 0
-                  const newValue = Math.min(currentValue + intensity * INTENSITY, 1)
-                  updateGridValue(currentRow, currentCol, newValue)
+                if (distance <= radius) {
+                  const intensity =
+                    (1 - distance / radius) *
+                    (isMouse ? this.config.ANIMATION.MOUSE_INTENSITY : this.config.ANIMATION.WAVE_INTENSITY)
+                  // Ensure cells stay active longer by capping intensity
+                  this.gridManager.updateCell(
+                    currentRow,
+                    currentCol,
+                    Math.min(this.gridManager.grid[currentRow][currentCol] + intensity, 1),
+                  )
                 }
               }
             }
           }
-          processed.add(key)
         }
-      })
 
-      mouseQueue.length = 0
-    }
+        isValidCell(row, col) {
+          return row >= 0 && row < this.gridManager.rows && col >= 0 && col < this.gridManager.cols
+        }
 
-    // Core Loop
-    function animate(): void {
-      processMouseQueue()
-      const needsUpdate = fadeActiveCells()
-      updateWavePositions()
+        draw() {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-      if (needsUpdate || dirtyCells.size > 0) {
-        drawDirtyCells()
-      }
+          const cellSize = this.config.ANIMATION.CELL_SIZE
+          const opacityGroups = new Map()
 
-      requestAnimationFrame(animate)
-    }
+          // Draw all active cells, not just dirty ones
+          this.gridManager.activeCells.forEach((key) => {
+            const [row, col] = key.split('|').map(Number)
+            const opacity = this.gridManager.grid[row][col]
+            const quantized = Math.floor(opacity * 40) / 40
 
-    // Setup
-    function setupCanvas(preserveWaveState = false): void {
-      if (!canvas) return
+            if (!opacityGroups.has(quantized)) {
+              opacityGroups.set(quantized, new Path2D())
+            }
 
-      // NEW: Capture current progress before resize
-      const previousStates = preserveWaveState
-        ? waveStates.map((state, index) => ({
-            progress: waveIndices[index] / WAVE_PATH_LENGTH,
-            velocityY: state.velocityY,
-            waveOffset: state.waveOffset,
-          }))
-        : null
+            const x = col * cellSize
+            const y = row * cellSize
+            opacityGroups.get(quantized).rect(x, y, cellSize - 1, cellSize - 1)
+          })
+          const sortedOpacities = Array.from(opacityGroups.keys()).sort((a, b) => a - b)
 
-      // EXISTING RESIZE LOGIC (unchanged)
-      canvas.width = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
+          sortedOpacities.forEach((opacity, index) => {
+            this.ctx.fillStyle = `rgba(40, 54, 24, ${opacity * 0.95})`
+            this.ctx.fill(opacityGroups.get(opacity))
+          })
 
-      const newCols = Math.ceil(canvas.width / CELL_SIZE) + 1
-      const newRows = Math.ceil(canvas.height / CELL_SIZE) + 1
+          this.gridManager.dirtyCells.clear()
+        }
 
-      if (newRows !== rows || newCols !== cols) {
-        resizeGrid(newRows, newCols)
-        rows = newRows
-        cols = newCols
-      }
+        startTextRotation() {
+          const words = Array.from({ length: this.config.ANIMATION.BASE_WORD.length }, (_, i) => {
+            const chars = [...this.config.ANIMATION.BASE_WORD.toLowerCase()]
+            chars[i] = chars[i].toUpperCase()
+            return chars.join('')
+          })
 
-      // MODIFIED: Conditional wave path calculation
-      if (preserveWaveState && previousStates) {
-        // Recalculate paths while maintaining state
-        calculateWavePaths(true)
-
-        // Restore previous progress
-        previousStates.forEach((state, index) => {
-          waveIndices[index] = Math.floor(state.progress * WAVE_PATH_LENGTH)
-          waveStates[index] = {
-            ...waveStates[index],
-            velocityY: state.velocityY,
-            waveOffset: state.waveOffset,
+          let currentIndex = 0
+          const rotate = () => {
+            this.rotatingText.textContent = words[currentIndex]
+            currentIndex = (currentIndex + 1) % words.length
+            setTimeout(rotate, this.config.ANIMATION.WORD_DELAY)
           }
-        })
-      } else {
-        // Initial calculation
-        calculateWavePaths()
-        waveIndices = Array(WAVES.length).fill(0)
-        const now = performance.now()
-        waveStartTimes = WAVES.map((wave) => now + wave.delay)
+          rotate()
+        }
+
+        setupEventListeners() {
+          const resizeObserver = new ResizeObserver(() => this.setupCanvas())
+          resizeObserver.observe(this.canvas)
+
+          const handleResize = () => {
+            cancelAnimationFrame(this.animationState.frameId)
+            setTimeout(() => {
+              this.setupCanvas()
+              this.startAnimation()
+            }, 200)
+          }
+
+          const handleVisibility = () => {
+            this.animationState.isVisible = !document.hidden
+            if (this.animationState.isVisible) this.startAnimation()
+          }
+
+          window.addEventListener('resize', handleResize)
+          document.addEventListener('visibilitychange', handleVisibility)
+          this.canvas.addEventListener(
+            'mousemove',
+            (e) => {
+              const rect = this.canvas.getBoundingClientRect()
+              this.animationState.mouseQueue.push([e.clientX - rect.left, e.clientY - rect.top])
+            },
+            { passive: true },
+          )
+
+          // Cleanup handlers
+          this.dispose = () => {
+            window.removeEventListener('resize', handleResize)
+            resizeObserver.unobserve(this.canvas)
+            document.removeEventListener('visibilitychange', handleVisibility)
+            cancelAnimationFrame(this.animationState.frameId)
+          }
+        }
       }
-    }
 
-    function init(): void {
-      if (typeof window === 'undefined') return
+      // Astro Integration
+      let animationInstance = null
 
-      // 1. Original initialization code
-      rotateWords()
-      setupCanvas()
+      const initAnimation = () => {
+        if (!animationInstance) animationInstance = new GridAnimation()
+      }
 
-      // 2. Original mouse listener (unchanged)
-      canvas?.addEventListener('mousemove', (e: MouseEvent) => {
-        const rect = canvas!.getBoundingClientRect()
-        mouseQueue.push([e.clientX - rect.left, e.clientY - rect.top])
-      })
+      const cleanupAnimation = () => {
+        if (animationInstance) {
+          animationInstance.dispose()
+          animationInstance = null
+        }
+      }
 
-      // 3. NEW: Visibility and lifecycle event handlers
-      document.addEventListener('visibilitychange', handleVisibilityChange)
-      window.addEventListener('pagehide', () => (isVisible = false))
-      window.addEventListener('pageshow', () => (isVisible = true))
+      if (typeof window !== 'undefined') {
+        document.addEventListener('astro:beforeunload', cleanupAnimation)
+        document.addEventListener('astro:after-swap', () => {
+          cleanupAnimation()
+          initAnimation()
+        })
 
-      // 4. MODIFIED: Resize handler (was previously window.addEventListener('resize', setupCanvas))
-      window.addEventListener('resize', handleResize)
-
-      // 5. Original animation start (unchanged but now using animationFrameId)
-      lastUpdateTime = performance.now()
-      animationFrameId = requestAnimationFrame(animate)
-    }
-
-    init()
-  })()
-</script>
+        if (document.readyState === 'complete') initAnimation()
+        else window.addEventListener('load', initAnimation)
+      }
+    })()
+  </script>
+</section>
 
 <style>
   canvas {
     background-color: var(--background);
   }
-  /* Keep the previous fade effect CSS */
   .hero::after {
     content: '';
     position: absolute;
