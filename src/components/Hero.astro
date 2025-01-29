@@ -24,21 +24,21 @@
         ANIMATION: {
           ACTIVATION_THRESHOLD: 0.01,
           AMPLITUDE: 30,
-          BASE_WAVE_SPEED: 0.02,
+          BASE_WAVE_SPEED: 0.035,
           BASE_WORD: 'Currently working on cirrus',
           CELL_SIZE: 8,
           DEACTIVATION_THRESHOLD: 0,
-          FADE_RATE: 0.0005,
+          FADE_RATE: 0.00035,
           FPS: 60,
           MOUSE_INTENSITY: 0.2,
           WAVE_INTENSITY: 0.04,
           MAX_WAVE_OFFSET: 100000,
-          MOUSE_RADIUS: 4,
+          MOUSE_RADIUS: 3,
           NOISE_AMPLITUDE: 40,
           NOISE_OCTAVES: 2,
           NOISE_PERSISTENCE: 0.5,
           NOISE_SCALE: 0.02,
-          RADIUS: 8,
+          RADIUS: 4,
           SINE_AMPLITUDE: 30,
           SINE_FREQUENCY: 0.03,
           WAVE_PATH_LENGTH: 1000,
@@ -68,7 +68,6 @@
         }
 
         initGrid() {
-          // Calculate based on logical dimensions
           this.rows = Math.ceil(this.logicalHeight / this.config.ANIMATION.CELL_SIZE) + 1
           this.cols =
             Math.ceil((this.logicalWidth + this.config.ANIMATION.WAVE_X_SPACING) / this.config.ANIMATION.CELL_SIZE) + 1
