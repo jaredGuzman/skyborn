@@ -2,33 +2,39 @@
 // | Color
 // | -------------------------------------------------------------
 
+/* Base Palette */
+$pakistan-green: rgba(40, 54, 24, 1);
+$gamboge: rgba(240, 162, 2, 1);
+$tangerine: rgba(241, 136, 5, 1);
+$cinnabar: rgba(217, 93, 57, 1);
+$cambridge-blue: rgba(123, 158, 135, 1);
+
 $colors: (
-  primary: (
-    100: rgb(96, 109, 55),
-    200: rgb(80, 95, 47),
-    300: rgb(66, 80, 39),
-    400: rgb(52, 67, 32),
-    500: rgb(39, 53, 24),
+  primary: (100: lighten(desaturate($pakistan-green, 10%), 15%),
+    200: lighten(desaturate($pakistan-green, 15%), 25%),
+    300: $pakistan-green,
+    400: darken(saturate($pakistan-green, 12%), 8%),
+    500: darken(saturate($tangerine, 18%), 15%),
   ),
-  secondary: (
-    100: rgb(221, 162, 95),
-    200: rgb(213, 148, 80),
-    300: rgb(204, 135, 66),
-    400: rgb(196, 121, 51),
-    500: rgb(187, 107, 37),
+  secondary: (100: lighten(desaturate($tangerine, 10%), 5%),
+    200: lighten(desaturate($tangerine, 15%), 10%),
+    300: $tangerine,
+    400: darken(saturate($tangerine, 12%), 10%),
+    500: darken(saturate($tangerine, 18%), 20%),
   ),
-  neutral: (
-    100: rgb(254, 250, 225),
-    200: rgb(225, 220, 198),
-    300: rgb(196, 190, 171),
-    400: rgb(168, 162, 146),
-    500: rgb(140, 134, 121),
-    600: rgb(113, 108, 97),
-    700: rgb(87, 82, 74),
-    800: rgb(62, 58, 52),
-    900: rgb(39, 36, 32),
+  tertiary: (gamboge: $gamboge,
+    cinnabar: $cinnabar,
+    cambridge: $cambridge-blue ),
+  neutral: (100: rgb(251, 248, 241),
+    200: rgb(238, 233, 221),
+    300: rgb(213, 206, 190),
+    400: rgb(188, 179, 160),
+    500: rgb(162, 152, 131),
+    600: rgb(134, 124, 103),
+    700: rgb(106, 97, 77),
+    800: rgb(77, 70, 54),
+    900: rgb(48, 43, 32),
   ),
-  dark: (
-    100: rgb(24, 23, 22),
+  dark: (100: rgb(24, 23, 22),
   ),
 );

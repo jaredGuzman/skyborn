@@ -1,47 +1,463 @@
----
-import { Icon } from 'astro-icon/components'
-
-const { src = '/astronaut-hero-img.webp' } = Astro.props
----
-
-<section class="hero my-24">
-  <div class="container">
-    <div class="grid grid-cols-1 items-center gap-24 lg:grid-cols-2">
-      <div class="flex flex-col items-center gap-8 md:items-start">
-        <h1 class="text-center text-6xl md:text-left lg:text-8xl">
-          <slot><span class="text-gradient">Accessible</span> Starter for Astro</slot>
-        </h1>
-        <div class="flex flex-col gap-3 min-[500px]:flex-row">
-          <a class="button has-icon" href="https://github.com/markteekman/accessible-astro-starter">
-            <Icon name="ion:star-outline" />
-            Star on GitHub
-          </a>
-          <a
-            class="button has-icon color-secondary"
-            href="https://github.com/markteekman/accessible-astro-starter/blob/main/README.md"
-          >
-            <Icon name="ion:bookmark-outline" />
-            Read the Docs
-          </a>
-        </div>
-      </div>
-      <img class="hidden lg:block" src={src} alt="" decoding="async" />
-    </div>
+<section class="hero min-h-48rem relative flex max-h-[60vh] items-center justify-center">
+  <canvas id="gridCanvas" class="h-full w-full"></canvas>
+  <div class="pointer-events-none absolute text-center">
+    <h6 id="rotating-text" class="ml-2 inline-block text-5xl font-bold">FUN</h6>
   </div>
+
+  <script is:inline define:vars={{ isDev: import.meta.env.DEV }}>
+    const debug = (...args) => isDev && console.log(...args)
+
+    ;(() => {
+      const CONFIG = {
+        GRID: {
+          // All grid-related configurations
+          ACTIVATION_THRESHOLD: 0.01,
+          CELL_SIZE: 8,
+          DEACTIVATION_THRESHOLD: 0,
+          FADE_RATE: 0.00035,
+          MOUSE_INTENSITY: 0.2,
+          MOUSE_RADIUS: 3,
+          RADIUS: 4,
+          WAVE_INTENSITY: 0.04,
+          QUANTIZATION_LEVELS: 50,
+        },
+        WAVES: [
+          { yPos: 0.2, delay: 17500 },
+          { yPos: 0.7, delay: 100 },
+          { yPos: 0.9, delay: 45000 },
+        ],
+        PHYSICS: {
+          // All wave physics configurations
+          AMPLITUDE: 20,
+          BASE_WAVE_SPEED: 0.035,
+          FPS: 60,
+          MAX_WAVE_OFFSET: 100000,
+          NOISE_AMPLITUDE: 40,
+          NOISE_OCTAVES: 2,
+          NOISE_PERSISTENCE: 0.4,
+          NOISE_SCALE: 0.02,
+          SINE_AMPLITUDE: 30,
+          SINE_FREQUENCY: 0.03,
+          WAVE_PATH_LENGTH: 1000,
+          WAVE_SPEED_MULTIPLIER: 0.003,
+          WAVE_X_SPACING: 100,
+        },
+        TEXT: {
+          BASE_WORD: 'Currently working on cirrus',
+          WORD_DELAY: 100,
+        },
+      }
+
+      class GridManager {
+        constructor(canvas, gridConfig, waveConfig, physicsConfig) {
+          debug('🏗️ GridManager initialized')
+          this.canvas = canvas
+          this.gridConfig = gridConfig
+          this.waveConfig = waveConfig
+          this.physicsConfig = physicsConfig
+          this.grid = new Float32Array(0)
+          this.activeCells = new Set()
+          this.dirtyCells = new Set()
+          this.cols = 0
+          this.rows = 0
+          this.initGrid()
+        }
+
+        setLogicalSize(width, height) {
+          const newCols = Math.ceil((width + this.physicsConfig.WAVE_X_SPACING) / this.gridConfig.CELL_SIZE) + 1
+          const newRows = Math.ceil(height / this.gridConfig.CELL_SIZE) + 1
+
+          if (newRows !== this.rows || newCols !== this.cols) {
+            this.rows = newRows
+            this.cols = newCols
+            this.initGrid()
+          }
+        }
+
+        initGrid() {
+          const size = this.rows * this.cols
+          const oldGrid = this.grid
+          this.grid = new Float32Array(size)
+          if (oldGrid.length > 0) {
+            const minCols = Math.min(this.cols, Math.floor(oldGrid.length / this.rows))
+            for (let row = 0; row < this.rows; row++) {
+              for (let col = 0; col < minCols; col++) {
+                this.grid[row * this.cols + col] = oldGrid[row * minCols + col] || 0
+              }
+            }
+          }
+          this.activeCells.clear()
+          this.dirtyCells.clear()
+        }
+
+        markCellDirty(row, col) {
+          const key = row * this.cols + col
+          this.dirtyCells.add(key)
+          if (this.grid[key] > this.gridConfig.ACTIVATION_THRESHOLD) {
+            this.activeCells.add(key)
+          }
+        }
+
+        updateCell(row, col, value) {
+          const index = row * this.cols + col
+          if (Math.abs(this.grid[index] - value) < 0.01) return
+          this.grid[index] = value
+          this.markCellDirty(row, col)
+        }
+
+        fadeActiveCells(deltaTime) {
+          const fadeAmount = deltaTime * this.gridConfig.FADE_RATE
+          const fadedCells = new Set()
+          const cols = this.cols
+
+          for (const key of this.activeCells) {
+            const newValue = Math.max(0, this.grid[key] - fadeAmount)
+            this.grid[key] = newValue
+            this.markCellDirty(Math.floor(key / cols), key % cols)
+
+            if (newValue <= this.gridConfig.DEACTIVATION_THRESHOLD) {
+              fadedCells.add(key)
+              this.grid[key] = 0
+            }
+          }
+
+          fadedCells.forEach((key) => this.activeCells.delete(key))
+          return this.activeCells.size > 0
+        }
+      }
+
+      class WaveManager {
+        constructor(canvas, wavesConfig, physicsConfig) {
+          this.canvas = canvas
+          this.wavesConfig = wavesConfig
+          this.physicsConfig = physicsConfig
+          this.waveStates = []
+          this.noiseSeeds = []
+          this.precomputedOffsets = new Map()
+          this.initWaves()
+        }
+
+        setLogicalSize(width, height) {
+          this.width = width
+          this.height = height
+        }
+
+        initWaves() {
+          this.waveStates = this.wavesConfig.map((wave, index) => ({
+            amplitude: this.physicsConfig.SINE_AMPLITUDE,
+            delay: wave.delay,
+            frequency: this.physicsConfig.SINE_FREQUENCY,
+            phase: 0,
+            waveOffset: 0,
+            startTime: null,
+            yPos: wave.yPos,
+            noiseSeed: Math.random() * 1000,
+          }))
+        }
+
+        getNoise(x, seed) {
+          const X = Math.floor(x) & 255
+          const x0 = x - Math.floor(x)
+          const t = x0 * x0 * x0 * (x0 * (x0 * 6 - 15) + 10)
+          const grad = (v) => ((Math.sin(v * 987.654 + seed) * 54321.12345) % 1) * 2 - 1
+          return (1 - t) * grad(X) * x0 + t * grad(X + 1) * (x0 - 1)
+        }
+
+        getCurrentWavePositions() {
+          const now = performance.now()
+          return this.waveStates
+            .map((state) => {
+              if (state.startTime === null) state.startTime = now + state.delay
+              if (now < state.startTime) return null
+              const elapsed = now - state.startTime
+              const totalTravel = this.width + this.physicsConfig.WAVE_X_SPACING
+              state.waveOffset = (elapsed * this.physicsConfig.BASE_WAVE_SPEED) % totalTravel
+
+              const noiseX = state.waveOffset * this.physicsConfig.NOISE_SCALE
+              const noiseY = this.getNoise(noiseX, state.noiseSeed) * this.physicsConfig.NOISE_AMPLITUDE
+              const y =
+                this.height * state.yPos + Math.sin(state.waveOffset * state.frequency) * state.amplitude + noiseY
+
+              return {
+                x: state.waveOffset,
+                y: Math.min(Math.max(y, 0), this.height),
+              }
+            })
+            .filter(Boolean)
+        }
+      }
+
+      class GridAnimation {
+        constructor() {
+          this.config = CONFIG
+          this.canvas = document.getElementById('gridCanvas')
+          this.ctx = this.canvas?.getContext('2d')
+          this.rotatingText = document.getElementById('rotating-text')
+          if (!this.canvas || !this.ctx) return
+          this.gridManager = new GridManager(this.canvas, this.config.GRID, this.config.WAVES, this.config.PHYSICS)
+          this.waveManager = new WaveManager(this.canvas, this.config.WAVES, this.config.PHYSICS)
+          this.mouseQueue = []
+          this.precomputeRadiusOffsets()
+          this.handleResize = null
+          this.resizeObserver = null
+          this.handleMouseMove = null
+          this.handleTouchMove = null
+          this.animationFrameId = null
+          this.boundAnimate = () => (this.animationFrameId = requestAnimationFrame(this.animate))
+          this.init()
+        }
+
+        precomputeRadiusOffsets() {
+          const precompute = (radius) => {
+            const offsets = []
+            for (let i = -radius; i <= radius; i++) {
+              for (let j = -radius; j <= radius; j++) {
+                const dist = Math.sqrt(i * i + j * j)
+                if (dist <= radius) offsets.push([i, j, dist])
+              }
+            }
+            return offsets
+          }
+          this.radiusOffsets = {
+            mouse: precompute(this.config.GRID.MOUSE_RADIUS),
+            wave: precompute(this.config.GRID.RADIUS),
+          }
+        }
+
+        init() {
+          if (!this.canvas || !this.ctx) return
+          this.setupCanvas()
+          this.setupEventListeners()
+          this.startAnimation()
+          this.startTextRotation()
+        }
+
+        dispose() {
+          window.removeEventListener('resize', this.handleResize)
+          this.resizeObserver?.disconnect()
+          cancelAnimationFrame(this.animationFrameId)
+
+          if (this.canvas) {
+            this.canvas.removeEventListener('mousemove', this.handleMouseMove)
+            this.canvas.removeEventListener('touchmove', this.handleTouchMove)
+          }
+
+          if (this.ctx) {
+            this.ctx.clearRect(0, 0, this.canvas?.width || 0, this.canvas?.height || 0)
+          }
+
+          if (this.canvas) {
+            this.canvas.width = 0
+            this.canvas.height = 0
+          }
+        }
+
+        setupEventListeners() {
+          this.handleMouseMove = (e) => {
+            const rect = this.canvas.getBoundingClientRect()
+            const x = e.clientX - rect.left
+            const y = e.clientY - rect.top
+            this.mouseQueue.push([x, y])
+          }
+
+          this.handleTouchMove = (e) => {
+            const rect = this.canvas.getBoundingClientRect()
+            const touch = e.touches[0]
+            const x = touch.clientX - rect.left
+            const y = touch.clientY - rect.top
+            this.mouseQueue.push([x, y])
+          }
+
+          this.canvas.addEventListener('mousemove', this.handleMouseMove, { passive: true })
+          this.canvas.addEventListener('touchmove', this.handleTouchMove, { passive: false })
+
+          // Add missing resize handler
+          this.handleResize = () => {
+            cancelAnimationFrame(this.animationFrameId)
+            this.setupCanvas()
+            this.startAnimation()
+          }
+          window.addEventListener('resize', this.handleResize)
+
+          this.resizeObserver = new ResizeObserver(this.setupCanvas())
+          this.resizeObserver.observe(this.canvas)
+        }
+
+        setupCanvas() {
+          const dpr = window.devicePixelRatio || 1
+          const rect = this.canvas.getBoundingClientRect()
+
+          this.canvas.width = rect.width * dpr
+          this.canvas.height = rect.height * dpr
+          this.ctx.setTransform(1, 0, 0, 1, 0, 0)
+          this.ctx.scale(dpr, dpr)
+
+          this.gridManager.setLogicalSize(rect.width, rect.height)
+          this.waveManager.setLogicalSize(rect.width, rect.height)
+        }
+
+        startAnimation() {
+          let lastTime = performance.now()
+          const animate = (now) => {
+            const deltaTime = now - lastTime
+            lastTime = now
+
+            this.update(now, deltaTime)
+            this.draw()
+            this.animationFrameId = requestAnimationFrame(animate)
+          }
+          this.animationFrameId = requestAnimationFrame(animate)
+        }
+
+        update(now, deltaTime) {
+          this.processMouseInput()
+          this.updateWaves()
+          this.gridManager.fadeActiveCells(deltaTime)
+        }
+
+        processMouseInput() {
+          for (const [x, y] of this.mouseQueue) {
+            this.applyRadiusEffect(x, y, 'mouse')
+          }
+          this.mouseQueue = []
+        }
+
+        updateWaves() {
+          this.waveManager.getCurrentWavePositions().forEach(({ x, y }) => {
+            this.applyRadiusEffect(x, y, 'wave')
+          })
+        }
+
+        applyRadiusEffect(x, y, type) {
+          const cellSize = this.config.GRID.CELL_SIZE
+          const col = Math.floor(x / cellSize)
+          const row = Math.floor(y / cellSize)
+          const { MOUSE_INTENSITY, WAVE_INTENSITY, RADIUS, MOUSE_RADIUS } = this.config.GRID
+
+          for (const [i, j, dist] of this.radiusOffsets[type]) {
+            const currentRow = row + i
+            const currentCol = col + j
+            if (
+              currentRow >= 0 &&
+              currentRow < this.gridManager.rows &&
+              currentCol >= 0 &&
+              currentCol < this.gridManager.cols
+            ) {
+              const intensity =
+                (1 - dist / (type === 'mouse' ? MOUSE_RADIUS : RADIUS)) *
+                (type === 'mouse' ? MOUSE_INTENSITY : WAVE_INTENSITY)
+              this.gridManager.updateCell(
+                currentRow,
+                currentCol,
+                Math.min(this.gridManager.grid[currentRow * this.gridManager.cols + currentCol] + intensity, 1),
+              )
+            }
+          }
+        }
+
+        draw() {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+          const cellSize = this.config.GRID.CELL_SIZE
+          const quantizationLevels = this.config.GRID.QUANTIZATION_LEVELS
+          const opacityGroups = new Map()
+
+          for (const key of this.gridManager.activeCells) {
+            const row = Math.floor(key / this.gridManager.cols)
+            const col = key % this.gridManager.cols
+            const opacity = this.gridManager.grid[key]
+            const quantized = Math.floor(opacity * quantizationLevels) / quantizationLevels
+
+            if (!opacityGroups.has(quantized)) {
+              opacityGroups.set(quantized, new Path2D())
+            }
+            opacityGroups.get(quantized).rect(col * cellSize, row * cellSize, cellSize - 1, cellSize - 1)
+          }
+
+          Array.from(opacityGroups.keys())
+            .sort((a, b) => a - b)
+            .forEach((opacity) => {
+              this.ctx.fillStyle = `rgba(40, 54, 24, ${opacity * 0.95})`
+              this.ctx.fill(opacityGroups.get(opacity))
+            })
+        }
+
+        startTextRotation() {
+          const base = this.config.TEXT.BASE_WORD.toLowerCase()
+          const words = [...base]
+            .map((_, i) => {
+              const chars = [...base]
+              if (chars[i] !== ' ') chars[i] = chars[i].toUpperCase()
+              return chars.join('')
+            })
+            .filter((w) => w !== base)
+
+          let index = 0
+          const rotate = () => {
+            this.rotatingText.textContent = words[index++ % words.length]
+            setTimeout(rotate, this.config.TEXT.WORD_DELAY)
+          }
+          rotate()
+        }
+
+        setupEventListeners() {
+          const resizeObserver = new ResizeObserver(() => this.setupCanvas())
+          resizeObserver.observe(this.canvas)
+
+          this.canvas.addEventListener(
+            'mousemove',
+            (e) => {
+              const rect = this.canvas.getBoundingClientRect()
+              this.mouseQueue.push([e.clientX - rect.left, e.clientY - rect.top])
+            },
+            { passive: true },
+          )
+        }
+      }
+
+      // Astro Integration
+      let animationInstance = null
+
+      const initAnimation = () => {
+        cleanupAnimation()
+        animationInstance = new GridAnimation()
+        return animationInstance
+      }
+
+      const cleanupAnimation = () => {
+        if (animationInstance) {
+          animationInstance.dispose()
+          animationInstance = null
+        }
+      }
+
+      if (typeof window !== 'undefined') {
+        document.addEventListener('astro:page-transition:start', cleanupAnimation)
+        document.addEventListener('astro:page-transition:end', initAnimation)
+        document.addEventListener('astro:after-swap', initAnimation)
+
+        if (document.readyState === 'complete') {
+          initAnimation()
+        } else {
+          window.addEventListener('load', initAnimation)
+        }
+      }
+    })()
+  </script>
 </section>
 
-<style lang="scss">
-  .text-gradient {
-    background: linear-gradient(315deg, var(--primary-200) 25%, var(--secondary-500));
-    background-clip: border-box;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+<style>
+  canvas {
+    background-color: var(--background);
   }
-
-  :global(.darkmode .text-gradient) {
-    background: linear-gradient(315deg, var(--primary-200) 25%, var(--secondary-400));
-    background-clip: border-box;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 25%;
+    background: linear-gradient(to bottom, transparent 0%, var(--background) 100%);
+    pointer-events: none;
+    z-index: 1;
   }
 </style>

@@ -14,7 +14,7 @@ const {
 } = Astro.props
 ---
 
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" data-page={title.toLowerCase()}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -52,6 +52,7 @@ const {
         --font-color: var(--neutral-900);
         --action-color: var(--primary-300);
         --action-color-state: var(--primary-500);
+        --text-color: var(--primary-300);
         --background: var(--neutral-100);
         --primary-background: var(--primary-100);
         --neutral-background: var(--neutral-200);
@@ -64,6 +65,7 @@ const {
         --font-color: var(--neutral-100);
         --action-color: var(--secondary-100);
         --action-color-state: var(--secondary-500);
+        --text-color: var(--neutral-100);
         --background: var(--dark-100);
         --primary-background: var(--primary-500);
         --neutral-background: var(--neutral-900);
@@ -78,12 +80,23 @@ const {
       body {
         display: flex;
         flex-direction: column;
+        align-items: start;
         color: var(--font-color);
         background-color: var(--background);
         overflow-x: hidden;
 
-        main {
-          flex: 1 0 auto;
+        [data-page='home'] & {
+          main {
+            flex: 1 0 auto;
+            padding-top: 3.5rem;
+          }
+        }
+
+        [data-page]:not([data-page='home']) & {
+          main {
+            flex: 1 0 auto;
+            padding-top: 4rem;
+          }
         }
 
         footer {
@@ -96,7 +109,7 @@ const {
         }
 
         pre {
-          transition: 
+          transition:
             border-color var(--transition-duration) var(--transition-timing),
             background-color var(--transition-duration) var(--transition-timing);
         }
@@ -110,7 +123,8 @@ const {
         border: 2px solid var(--action-color);
       }
 
-      pre, .darkmode {
+      pre,
+      .darkmode {
         will-change: transform;
       }
 
