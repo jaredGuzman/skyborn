@@ -21,19 +21,18 @@ const latestPosts = sortedPosts.slice(0, 3).map((post: any) => ({
 
 <DefaultLayout title="Home">
   <Hero />
-  <section class="my-64">
+  <section class="my-32" aria-label="Our Origin">
     <div class="container">
-      <ContentMedia imgSrc="/game-preview.webp">
-        <h2 class="text-5xl">Currently Working On: Cirrus</h2>
-        <p class="text-2xl">
-          From a young but passionate group of friends, Cirrus unites veteran creators and rising talents in Sacramento,
-          forging dreams into playable reality. Born from our passion for gaming, it's where friendship meets ambition
-          in game development.
+      <ContentMedia imgSrc="/studio-team.webp" imgSide="right">
+        <h2 class="text-5xl italic">Hi there!</h2>
+        <p class="text-xl">We're Skyborn Studios, a small team of passionate game developers from Sacramento, CA.</p>
+        <p class="text-xl">
+          We're building the games for the love of it, telling stories we want to tell. We're not here to make a quick
+          buck, we're here to make games that we want to play.
         </p>
-        <div class="mt-8 flex gap-4">
-          <a href="/games" class="button">Play Now</a>
-          <a href="/games" class="button button-ghost">Learn More</a>
-        </div>
+        <p class="text-xl">
+          Follow along as we build our first game, <a href="/games/cirrus" class="italic">Cirrus</a>.
+        </p>
       </ContentMedia>
     </div>
   </section>

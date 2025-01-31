@@ -240,7 +240,7 @@ import logo from '../assets/img/logo.svg'
       }
 
       .mobile-menu {
-        display: none;
+        // display: none;
       }
 
       .darkmode-toggle {
@@ -252,10 +252,10 @@ import logo from '../assets/img/logo.svg'
       flex-direction: column;
 
       .mobile-menu {
-        display: none;
+        // display: none;
 
         &.show {
-          display: block;
+          // display: block;
         }
       }
 
@@ -309,14 +309,40 @@ import logo from '../assets/img/logo.svg'
 
     .mobile-menu {
       flex-basis: 100%;
-      padding: 2rem 0;
+      padding: 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: all 0.3s ease-in-out;
+      visibility: hidden;
+      background-color: var(--background);
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 0;
 
       > ul {
         flex-direction: column;
+        padding: 0 1rem;
+        transform: translateY(-1rem);
+        transition: transform 0.3s ease-in-out;
 
         ul {
           position: relative;
           margin-top: 1rem;
+        }
+      }
+
+      &.show {
+        padding: 2rem 0;
+        max-height: 100vh;
+        opacity: 1;
+        visibility: visible;
+
+        > ul {
+          transform: translateY(0);
         }
       }
 
