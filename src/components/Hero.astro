@@ -1,7 +1,9 @@
 <section class="hero min-h-48rem relative flex max-h-[60vh] items-center justify-center">
-  <canvas id="gridCanvas" class="h-full w-full"></canvas>
+  <canvas id="gridCanvas" class="h-full max-h-[60vh] w-full"></canvas>
   <div class="pointer-events-none absolute text-center">
-    <h6 id="rotating-text" class="ml-2 inline-block text-5xl font-bold">FUN</h6>
+    <h6 id="rotating-text" class="ml-2 inline-block text-3xl font-bold md:text-4xl lg:text-5xl">
+      Curretnly working on: Cirrus
+    </h6>
   </div>
 
   <script is:inline define:vars={{ isDev: import.meta.env.DEV }}>
@@ -43,7 +45,7 @@
           WAVE_X_SPACING: 100,
         },
         TEXT: {
-          BASE_WORD: 'Currently working on cirrus',
+          BASE_WORD: 'Currently working on: cirrus',
           WORD_DELAY: 100,
         },
       }
