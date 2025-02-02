@@ -1,17 +1,13 @@
 ---
+/// <reference types="astro/astro-jsx" />
 import DefaultLayout from '../layouts/DefaultLayout.astro'
 import Hero from '../components/Hero.astro'
-import Feature from '../components/Feature.astro'
 import ContentMedia from '../components/ContentMedia.astro'
-import { Card } from 'accessible-astro-components'
 import { Image } from 'astro:assets'
 
 const posts = await Astro.glob('../content/blog/*.md')
-const sortedPosts = posts.sort((a: any, b: any) => {
-  return new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
-})
 
-const latestPosts = sortedPosts.slice(0, 3).map((post: any) => ({
+const latestPosts = posts.slice(0, 5).map((post: any) => ({
   ...post.frontmatter,
   content: post.compiledContent(),
   url: `/blog/${post.frontmatter.slug || post.file.split('/').pop().replace('.md', '')}`,
@@ -21,10 +17,10 @@ const latestPosts = sortedPosts.slice(0, 3).map((post: any) => ({
 
 <DefaultLayout title="Home">
   <Hero />
-  <section class="my-32" aria-label="Our Origin">
+  <section class="my-16" aria-label="Our Origin">
     <div class="container">
-      <ContentMedia imgSrc="/studio-team.webp" imgSide="right">
-        <h2 class="text-5xl italic">Hi there!</h2>
+      <ContentMedia imgSrc="https://res.cloudinary.com/dxwistw0r/image/upload/v1738302326/landing-image_xfzb72.png" imgSide="right">
+        <h2 class="text-4xl italic">Hi there!</h2>
         <p class="text-xl">We're Skyborn Studios, a small team of passionate game developers from Sacramento, CA.</p>
         <p class="text-xl">
           We're building the games for the love of it, telling stories we want to tell. We're not here to make a quick
@@ -37,38 +33,69 @@ const latestPosts = sortedPosts.slice(0, 3).map((post: any) => ({
     </div>
   </section>
 
-  <section class="my-64">
-    <div class="container">
-      <h2 class="mb-16 text-6xl">Our Values</h2>
-      <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
-        <Feature icon="mdi:heart" title="Player First">
-          [Lorem ipsum dolor sit amet, consectetur adipiscing elit. ]
-        </Feature>
-        <Feature icon="mdi:lightbulb" title="Innovation">
-          [Lorem ipsum dolor sit amet, consectetur adipiscing elit. ]
-        </Feature>
-        <Feature icon="mdi:star" title="Quality"> [Lorem ipsum dolor sit amet, consectetur adipiscing elit. ] </Feature>
+  <section class="my-16" aria-label="Join Our Journey">
+    <div class="container text-center">
+      <h2 class="text-4xl">Join Our Journey</h2>
+      <p class="mx-auto mt-8 max-w-3xl text-xl w-[32rem] text-center">
+        We're building in the open! Come read our development log if you're curious about how we're building Cirrus 😊
+      </p>
+      <p class="mx-auto mt-8 max-w-3xl text-xl w-[32rem] text-center">
+        We've got a community Discord in the works, but it's not ready yet. Come back soon to check when it's ready!
+      </p>
+      <div class="mt-12 flex justify-center gap-6">
+        <!-- <a href="/discord" class="button button-ghost flex items-center gap-3">
+          <span class="i-mdi-discord text-2xl"></span>
+          Discord Community
+        </a> -->
+        <a href="/blog" aria-label="Development Blog" class="button">
+          View Development Blog
+        </a>
       </div>
     </div>
   </section>
 
   <section class="my-64">
     <div class="container">
-      <h2 class="mb-16 text-6xl">Development Blog</h2>
-      <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
+      <h2 class="mb-16 text-4xl">Development Blog</h2>
+      <p class="mb-16 text-xl">This is a list of our latest blog posts. We'll be posting updates on our development progress here, feel free to read along!</p>
+      <div id="blog-grid" class="grid grid-cols-1 gap-12 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {
-          latestPosts.map((post) => (
-            <div class="space-content">
-              <Image src={post.thumbnail} alt="Blog post thumbnail" width={800} height={400} class="mb-4 rounded-lg" />
-              <h3 class="text-2xl">{post.title}</h3>
-              <p>{post.excerpt}</p>
-              <a href={post.url} class="button button-ghost mt-4">
-                Read More
-              </a>
-            </div>
-          ))
+          latestPosts.map((post) => {
+            return (
+              <div class="space-content post-item hidden">
+                <Image src={post.thumbnail} alt="Blog post thumbnail" inferSize class="mb-4 rounded-lg" />
+                <h3 class="text-2xl">{post.title}</h3>
+                <p>{post.excerpt}</p>
+                <a href={post.url} class="button button-ghost mt-4">
+                  Read More
+                </a>
+              </div>
+            )
+          })
         }
       </div>
     </div>
   </section>
 </DefaultLayout>
+
+
+<script>
+  function updateVisiblePosts() {
+    const grid = document.getElementById('blog-grid');
+    if (!grid) return;
+    const posts = grid.querySelectorAll('.post-item');
+    const computedStyle = window.getComputedStyle(grid);
+    const columns = computedStyle.gridTemplateColumns.split(' ').length;
+    
+    posts.forEach((post, index) => {
+      if (index < columns) {
+        post.classList.remove('hidden');
+      } else {
+        post.classList.add('hidden');
+      }
+    });
+  }
+
+  window.addEventListener('resize', updateVisiblePosts);
+  window.addEventListener('load', updateVisiblePosts);
+</script>

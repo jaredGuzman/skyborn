@@ -1,5 +1,5 @@
-<section class="hero min-h-48rem relative flex max-h-[60vh] items-center justify-center">
-  <canvas id="gridCanvas" class="h-full max-h-[60vh] w-full"></canvas>
+<section class="hero relative flex h-[min(48rem,60vh)] items-center justify-center">
+  <canvas id="gridCanvas" class="h-full w-full"></canvas>
   <div class="pointer-events-none absolute text-center">
     <h6 id="rotating-text" class="ml-2 inline-block text-3xl font-bold md:text-4xl lg:text-5xl">
       Curretnly working on: Cirrus
@@ -12,7 +12,6 @@
     ;(() => {
       const CONFIG = {
         GRID: {
-          // All grid-related configurations
           ACTIVATION_THRESHOLD: 0.01,
           CELL_SIZE: 8,
           DEACTIVATION_THRESHOLD: 0,
@@ -29,7 +28,6 @@
           { yPos: 0.9, delay: 45000 },
         ],
         PHYSICS: {
-          // All wave physics configurations
           AMPLITUDE: 20,
           BASE_WAVE_SPEED: 0.035,
           FPS: 60,

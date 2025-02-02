@@ -9,6 +9,7 @@ This is the codebase for v1.0 of the Skyborn Studios website. The website itself
 - Astro 5.0
 - Github
 - Github Actions
+- Cloudinary
 - [Accessible Starter for Astro](https://github.com/markteekman/accessible-astro-starter)
 
 ## Get in Contact
