@@ -19,14 +19,19 @@ const latestPosts = posts.slice(0, 5).map((post: any) => ({
   <Hero />
   <section class="my-16" aria-label="Our Origin">
     <div class="container">
-      <ContentMedia imgSrc="https://res.cloudinary.com/dxwistw0r/image/upload/v1738302326/landing-image_xfzb72.png" imgSide="right">
+      <ContentMedia
+        imgSrc="https://res.cloudinary.com/dxwistw0r/image/upload/v1738302326/landing-image_xfzb72.png"
+        imgSide="right"
+      >
         <h2 class="text-4xl italic">Hi there!</h2>
-        <p class="text-xl">We're Skyborn Studios, a small team of passionate game developers from Sacramento, CA.</p>
-        <p class="text-xl">
+        <p class="text-xl md:text-2xl">
+          We're Skyborn Studios, a small team of passionate game developers from Sacramento, CA.
+        </p>
+        <p class="text-xl md:text-2xl">
           We're building the games for the love of it, telling stories we want to tell. We're not here to make a quick
           buck, we're here to make games that we want to play.
         </p>
-        <p class="text-xl">
+        <p class="text-xl md:text-2xl">
           Follow along as we build our first game, <a href="/games/cirrus" class="italic">Cirrus</a>.
         </p>
       </ContentMedia>
@@ -36,10 +41,10 @@ const latestPosts = posts.slice(0, 5).map((post: any) => ({
   <section class="my-16" aria-label="Join Our Journey">
     <div class="container text-center">
       <h2 class="text-4xl">Join Our Journey</h2>
-      <p class="mx-auto mt-8 max-w-3xl text-xl w-[32rem] text-center">
+      <p class="mx-2 mx-auto mt-8 max-w-[32rem] text-left md:text-center text-xl md:text-2xl">
         We're building in the open! Come read our development log if you're curious about how we're building Cirrus 😊
       </p>
-      <p class="mx-auto mt-8 max-w-3xl text-xl w-[32rem] text-center">
+      <p class="mx-2 mx-auto mt-8 max-w-[32rem] text-left md:text-center text-xl md:text-2xl">
         We've got a community Discord in the works, but it's not ready yet. Come back soon to check when it's ready!
       </p>
       <div class="mt-12 flex justify-center gap-6">
@@ -47,17 +52,18 @@ const latestPosts = posts.slice(0, 5).map((post: any) => ({
           <span class="i-mdi-discord text-2xl"></span>
           Discord Community
         </a> -->
-        <a href="/blog" aria-label="Development Blog" class="button">
-          View Development Blog
-        </a>
+        <a href="/blog" aria-label="Development Blog" class="button"> View Development Blog </a>
       </div>
     </div>
   </section>
 
   <section class="my-64">
     <div class="container">
-      <h2 class="mb-16 text-4xl">Development Blog</h2>
-      <p class="mb-16 text-xl">This is a list of our latest blog posts. We'll be posting updates on our development progress here, feel free to read along!</p>
+      <h2 class="mb-16 text-4xl text-center">Development Blog</h2>
+      <p class="mb-16 text-xl md:text-2xl">
+        This is a list of our latest blog posts. We'll be posting updates on our development progress here, feel free to
+        read along!
+      </p>
       <div id="blog-grid" class="grid grid-cols-1 gap-12 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {
           latestPosts.map((post) => {
@@ -78,24 +84,23 @@ const latestPosts = posts.slice(0, 5).map((post: any) => ({
   </section>
 </DefaultLayout>
 
-
 <script>
   function updateVisiblePosts() {
-    const grid = document.getElementById('blog-grid');
-    if (!grid) return;
-    const posts = grid.querySelectorAll('.post-item');
-    const computedStyle = window.getComputedStyle(grid);
-    const columns = computedStyle.gridTemplateColumns.split(' ').length;
-    
+    const grid = document.getElementById('blog-grid')
+    if (!grid) return
+    const posts = grid.querySelectorAll('.post-item')
+    const computedStyle = window.getComputedStyle(grid)
+    const columns = computedStyle.gridTemplateColumns.split(' ').length
+
     posts.forEach((post, index) => {
       if (index < columns) {
-        post.classList.remove('hidden');
+        post.classList.remove('hidden')
       } else {
-        post.classList.add('hidden');
+        post.classList.add('hidden')
       }
-    });
+    })
   }
 
-  window.addEventListener('resize', updateVisiblePosts);
-  window.addEventListener('load', updateVisiblePosts);
+  window.addEventListener('resize', updateVisiblePosts)
+  window.addEventListener('load', updateVisiblePosts)
 </script>

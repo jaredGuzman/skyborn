@@ -1,8 +1,8 @@
 <section class="hero relative flex h-[min(48rem,60vh)] items-center justify-center">
   <canvas id="gridCanvas" class="h-full w-full"></canvas>
   <div class="pointer-events-none absolute text-center">
-    <h6 id="rotating-text" class="ml-2 inline-block text-3xl font-bold md:text-4xl lg:text-5xl">
-      Curretnly working on: Cirrus
+    <h6 id="rotating-text" class="inline-block text-3xl font-bold md:text-4xl lg:text-5xl">
+      Currently working on: Cirrus
     </h6>
   </div>
 
@@ -448,6 +448,7 @@
 <style>
   canvas {
     background-color: var(--background);
+    max-width: 100vw;
   }
   .hero::after {
     content: '';
