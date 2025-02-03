@@ -33,9 +33,9 @@ const {
       author={author}
     />
   </head>
-  <body>
+  <body class="h-fit">
     <Header />
-    <main id="main-content" transition:animate="fade">
+    <main id="main-content" class="w-full" transition:animate="fade">
       <slot />
     </main>
     <Footer />
@@ -85,10 +85,14 @@ const {
         background-color: var(--background);
         overflow-x: hidden;
 
+        main {
+          flex: 1 0 auto;
+        }
+
         [data-page='home'] & {
           main {
             flex: 1 0 auto;
-            padding-top: 3.5rem;
+            padding-top: 0rem;
           }
         }
 

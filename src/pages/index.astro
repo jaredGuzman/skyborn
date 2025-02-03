@@ -4,24 +4,42 @@ import DefaultLayout from '../layouts/DefaultLayout.astro'
 import Hero from '../components/Hero.astro'
 import ContentMedia from '../components/ContentMedia.astro'
 import { Image } from 'astro:assets'
+import { getCollection } from 'astro:content'
 
-const posts = await Astro.glob('../content/blog/*.md')
 
-const latestPosts = posts.slice(0, 5).map((post: any) => ({
-  ...post.frontmatter,
-  content: post.compiledContent(),
-  url: `/blog/${post.frontmatter.slug || post.file.split('/').pop().replace('.md', '')}`,
-  slug: post.frontmatter.slug || post.file.split('/').pop().replace('.md', ''),
-}))
+const posts = await getCollection('blog')
+
+const latestPosts = posts
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+  .slice(0, 5)
+  .map(post => ({
+    ...post,
+    data: {
+      ...post.data,
+      excerpt: post.data.excerpt || post.body
+        .replace(/<[^>]+>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 160)
+        .split(' ')
+        .slice(0, -1)
+        .join(' ') + '...'
+    }
+  }))
 ---
 
 <DefaultLayout title="Home">
   <Hero />
-  <section class="my-16" aria-label="Our Origin">
+
+  
+  <section class="home-section" aria-label="Our Origin">
     <div class="container">
       <ContentMedia
         imgSrc="https://res.cloudinary.com/dxwistw0r/image/upload/v1738302326/landing-image_xfzb72.png"
+        imgAlt="A little illustration of a fun little guy"
         imgSide="right"
+        imgHeight={3049}
+        imgWidth={1943}
       >
         <h2 class="text-4xl italic">Hi there!</h2>
         <p class="text-xl md:text-2xl">
@@ -38,13 +56,13 @@ const latestPosts = posts.slice(0, 5).map((post: any) => ({
     </div>
   </section>
 
-  <section class="my-16" aria-label="Join Our Journey">
+  <section class="home-section" aria-label="Join Our Journey">
     <div class="container text-center">
       <h2 class="text-4xl">Join Our Journey</h2>
-      <p class="mx-2 mx-auto mt-8 max-w-[32rem] text-left md:text-center text-xl md:text-2xl">
+      <p class="mx-auto mt-8 max-w-[32rem] text-left md:text-center text-xl md:text-2xl">
         We're building in the open! Come read our development log if you're curious about how we're building Cirrus 😊
       </p>
-      <p class="mx-2 mx-auto mt-8 max-w-[32rem] text-left md:text-center text-xl md:text-2xl">
+      <p class="mx-auto mt-8 max-w-[32rem] text-left md:text-center text-xl md:text-2xl">
         We've got a community Discord in the works, but it's not ready yet. Come back soon to check when it's ready!
       </p>
       <div class="mt-12 flex justify-center gap-6">
@@ -57,10 +75,10 @@ const latestPosts = posts.slice(0, 5).map((post: any) => ({
     </div>
   </section>
 
-  <section class="my-64">
+  <section class="home-section">
     <div class="container">
       <h2 class="mb-16 text-4xl text-center">Development Blog</h2>
-      <p class="mb-16 text-xl md:text-2xl">
+      <p id="blog-description" class="mb-16 text-xl md:text-2xl">
         This is a list of our latest blog posts. We'll be posting updates on our development progress here, feel free to
         read along!
       </p>
@@ -69,10 +87,10 @@ const latestPosts = posts.slice(0, 5).map((post: any) => ({
           latestPosts.map((post) => {
             return (
               <div class="space-content post-item hidden">
-                <Image src={post.thumbnail} alt="Blog post thumbnail" inferSize class="mb-4 rounded-lg" />
-                <h3 class="text-2xl">{post.title}</h3>
-                <p>{post.excerpt}</p>
-                <a href={post.url} class="button button-ghost mt-4">
+                <Image src={post.data.thumbnail} alt="Blog post thumbnail" inferSize class="mb-4 rounded-lg" />
+                <h3 class="text-2xl">{post.data.title}</h3>
+                <p>{post.data.excerpt}</p>
+                <a href={`/blog/${post.slug}`} class="button button-ghost mt-4">
                   Read More
                 </a>
               </div>
@@ -104,3 +122,14 @@ const latestPosts = posts.slice(0, 5).map((post: any) => ({
   window.addEventListener('resize', updateVisiblePosts)
   window.addEventListener('load', updateVisiblePosts)
 </script>
+
+
+<style>
+  .home-section {
+    margin: 8rem auto;
+    max-width: var(--layout-max-width);
+  }
+  #blog-description{
+    max-width: var(--content-max-width);
+  }
+</style>

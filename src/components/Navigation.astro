@@ -4,8 +4,8 @@ import { Image } from 'astro:assets'
 import logo from '../assets/img/logo.svg'
 ---
 
-<div id="main-navigation" class="is-desktop py-4">
-  <div class="container fixed">
+<div id="main-navigation" class="is-desktop py-4 relative">
+  <div class="container">
     <a href="/" class="flex items-center gap-2 !no-underline">
       <!-- <Image src={logo} alt="Your Logo" width="47" height="37" /> -->
       <span class="font-bold">Skyborn Studios</span>
@@ -192,7 +192,7 @@ import logo from '../assets/img/logo.svg'
         }
 
         if (targetItem) {
-          targetItem.querySelector('a, button, input').focus()
+          targetItem.querySelector('a, button, input')?.focus()
         }
       })
 
@@ -219,18 +219,16 @@ import logo from '../assets/img/logo.svg'
   @use '../assets/scss/base/outline' as *;
 
   #main-navigation {
-    height: 3.5rem;
-    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
     background-color: var(--background);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     > .container {
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
+      max-width: var(--layout-max-width);
     }
 
     &.is-desktop {

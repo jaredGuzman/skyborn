@@ -68,9 +68,11 @@
           const newRows = Math.ceil(height / this.gridConfig.CELL_SIZE) + 1
 
           if (newRows !== this.rows || newCols !== this.cols) {
-            this.rows = newRows
+            this.rows = newRows;
             this.cols = newCols
-            this.initGrid()
+            this.grid = new Float32Array(this.rows * this.cols) // <- Complete reset
+            this.activeCells.clear()
+            this.dirtyCells.clear()
           }
         }
 
@@ -140,6 +142,7 @@
         setLogicalSize(width, height) {
           this.width = width
           this.height = height
+          this.precomputedOffsets.clear()
         }
 
         initWaves() {
@@ -253,6 +256,7 @@
         }
 
         setupEventListeners() {
+
           this.handleMouseMove = (e) => {
             const rect = this.canvas.getBoundingClientRect()
             const x = e.clientX - rect.left
@@ -275,25 +279,37 @@
           this.handleResize = () => {
             cancelAnimationFrame(this.animationFrameId)
             this.setupCanvas()
+            this.ctx && this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             this.startAnimation()
           }
-          window.addEventListener('resize', this.handleResize)
 
-          this.resizeObserver = new ResizeObserver(this.setupCanvas())
-          this.resizeObserver.observe(this.canvas)
+          window.addEventListener('resize', this.handleResize)
+          this.resizeObserver = new ResizeObserver(this.handleResize);
+          this.resizeObserver.observe(this.canvas);
         }
 
         setupCanvas() {
+          if (!this.canvas) return
+
+          const style = window.getComputedStyle(this.canvas)
+          const logicalWidth = parseFloat(style.width)
+          const logicalHeight = parseFloat(style.height)
+
           const dpr = window.devicePixelRatio || 1
-          const rect = this.canvas.getBoundingClientRect()
+          this.canvas.width = Math.round(logicalWidth * dpr)
+          this.canvas.height = Math.round(logicalHeight * dpr)
 
-          this.canvas.width = rect.width * dpr
-          this.canvas.height = rect.height * dpr
-          this.ctx.setTransform(1, 0, 0, 1, 0, 0)
-          this.ctx.scale(dpr, dpr)
+          this.canvas.style.transform = 'translateZ(0)'
+          this.canvas.getBoundingClientRect()
+          
+          this.gridManager.setLogicalSize(logicalWidth, logicalHeight)
+          this.waveManager.setLogicalSize(logicalWidth, logicalHeight)
+        }
 
-          this.gridManager.setLogicalSize(rect.width, rect.height)
-          this.waveManager.setLogicalSize(rect.width, rect.height)
+        forceFullRedraw() {
+          for (let i = 0; i < this.gridManager.grid.length; i++) {
+            this.gridManager.activeCells.add(i)
+          }
         }
 
         startAnimation() {
@@ -302,10 +318,16 @@
             const deltaTime = now - lastTime
             lastTime = now
 
+            if (this.needsFullRedraw) {
+              this.forceFullRedraw()
+              this.needsFullRedraw = false
+            }
+
             this.update(now, deltaTime)
             this.draw()
             this.animationFrameId = requestAnimationFrame(animate)
           }
+          cancelAnimationFrame(this.animationFrameId);
           this.animationFrameId = requestAnimationFrame(animate)
         }
 
@@ -399,19 +421,6 @@
           rotate()
         }
 
-        setupEventListeners() {
-          const resizeObserver = new ResizeObserver(() => this.setupCanvas())
-          resizeObserver.observe(this.canvas)
-
-          this.canvas.addEventListener(
-            'mousemove',
-            (e) => {
-              const rect = this.canvas.getBoundingClientRect()
-              this.mouseQueue.push([e.clientX - rect.left, e.clientY - rect.top])
-            },
-            { passive: true },
-          )
-        }
       }
 
       // Astro Integration
@@ -448,7 +457,10 @@
 <style>
   canvas {
     background-color: var(--background);
-    max-width: 100vw;
+    width: 100% !important;
+    height: 100% !important;
+    transition: none !important;
+    animation: none !important;
   }
   .hero::after {
     content: '';

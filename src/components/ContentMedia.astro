@@ -1,17 +1,32 @@
 ---
-import { Media } from 'accessible-astro-components'
-
-const { imgSrc, reverseImg = false } = Astro.props
+import { Image } from 'astro:assets'
+const { imgSrc, imgAlt = '', imgHeight = 0, imgWidth = 0, reverseImg = false } = Astro.props
 ---
 
-<section class="my-64">
-  <div class="container">
-    <div class="grid grid-cols-1 gap-24 md:grid-cols-2">
-      {!reverseImg ? <Media class="m-auto max-h-[32rem] rounded-lg" src={imgSrc} /> : ''}
-      <div class="space-content flex flex-col justify-center">
-        <slot />
-      </div>
-      {reverseImg ? <Media class="m-auto max-h-[32rem] rounded-lg" src={imgSrc} /> : ''}
+<div class="container flex sm:flex-col md:flex-row gap-12 items-center justify-center">
+      {
+        !reverseImg ?
+          <div class="max-h-[60vh] w-full">
+            <Image class="content-media-img m-auto rounded-lg" src={imgSrc} alt={imgAlt} height={imgHeight} width={imgWidth} />
+          </div>
+        : null
+      }
+    <div class="space-content flex flex-col justify-center">
+      <slot />
     </div>
-  </div>
-</section>
+      {reverseImg ?
+          <div class="max-h-[60vh] w-full">
+            <Image class="content-media-img m-auto rounded-lg" src={imgSrc} alt={imgAlt} height={imgHeight} width={imgWidth} />
+          </div>
+        : null}
+  </div>  
+
+<style>
+  .content-media-img {
+    object-fit: contain;
+    height: 100%;
+    max-height: 60vh;
+    width: 100%;
+  }
+</style>
+
