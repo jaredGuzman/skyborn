@@ -8,36 +8,36 @@ const currentYear = new Date().getFullYear()
 
     <!-- Footer Columns -->
     <div class="footer-content">
-      <div class="company-info">
-        <h3>Skyborn Studios</h3>
-        <p>Independent game development studio crafting immersive experiences.</p>
+      <div class="company-info flex flex-col items-center">
+        <h3 class="footer-text">Skyborn Studios</h3>
+        <p class="footer-text">Independent game development studio building games for the love of it.</p>
       </div>
 
       <nav class="footer-nav">
         <div class="nav-column">
-          <h3>Company</h3>
+          <h3 class="footer-text">Company</h3>
           <ul>
-            <li><a href="/about">About Us</a></li>
-            <li><a href="/games">Our Games</a></li>
-            <li><a href="/blog">Blog</a></li>
-            <li><a href="/careers">Careers</a></li>
+            <li class="footer-text"><a href="/about">About Us</a></li>
+            <li class="footer-text"><a href="/games">Our Games</a></li>
+            <li class="footer-text"><a href="/blog">Blog</a></li>
+            <!-- <li class="footer-text"><a href="/careers">Careers</a></li> -->
           </ul>
         </div>
 
         <div class="nav-column">
           <h3>Resources</h3>
           <ul>
-            <li><a href="/press">Press Kit</a></li>
-            <li><a href="/support">Support</a></li>
-            <li><a href="/privacy">Privacy Policy</a></li>
-            <li><a href="/terms">Terms of Service</a></li>
+            <!-- <li class="footer-text"><a href="/press">Press Kit</a></li> -->
+            <li class="footer-text"><a href="/support">Support</a></li>
+            <li class="footer-text"><a href="/privacy">Privacy Policy</a></li>
+            <li class="footer-text"><a href="/terms-of-service">Terms of Service</a></li>
           </ul>
         </div>
 
         <div class="nav-column">
-          <h3>Contact</h3>
+          <h3 class="footer-text">Contact</h3>
           <ul>
-            <li>contact@skyborn.com</li>
+            <li class="footer-text">sybornstudios.devs@gmail.com</li>
             <!-- <li>Discord Community</li> -->
           </ul>
         </div>
@@ -49,7 +49,7 @@ const currentYear = new Date().getFullYear()
       </div>
     <!-- Copyright -->
     <div class="copyright">
-      <p>&copy; {currentYear} Skyborn Studios. All rights reserved.</p>
+      <p class="footer-text">&copy; {currentYear} Skyborn Studios. All rights reserved.</p>
     </div>
   </div>
 </footer>
@@ -57,6 +57,10 @@ const currentYear = new Date().getFullYear()
 <style lang="scss" is:global>
   @use '../assets/scss/base/breakpoint' as *;
   @use '../assets/scss/base/outline' as *;
+
+  .footer-content {
+    text-align: center;
+  }
 
   footer {
   padding: 4rem 0 2rem 0;
