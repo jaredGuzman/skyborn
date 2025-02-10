@@ -68,7 +68,7 @@
           const newRows = Math.ceil(height / this.gridConfig.CELL_SIZE) + 1
 
           if (newRows !== this.rows || newCols !== this.cols) {
-            this.rows = newRows;
+            this.rows = newRows
             this.cols = newCols
             this.grid = new Float32Array(this.rows * this.cols) // <- Complete reset
             this.activeCells.clear()
@@ -200,6 +200,7 @@
           this.gridManager = new GridManager(this.canvas, this.config.GRID, this.config.WAVES, this.config.PHYSICS)
           this.waveManager = new WaveManager(this.canvas, this.config.WAVES, this.config.PHYSICS)
           this.mouseQueue = []
+          this.dpr = window.devicePixelRatio || 1
           this.precomputeRadiusOffsets()
           this.handleResize = null
           this.resizeObserver = null
@@ -256,54 +257,64 @@
         }
 
         setupEventListeners() {
-
           this.handleMouseMove = (e) => {
             const rect = this.canvas.getBoundingClientRect()
-            const x = e.clientX - rect.left
-            const y = e.clientY - rect.top
+            const x = (e.clientX - rect.left) * this.dpr
+            const y = (e.clientY - rect.top) * this.dpr
             this.mouseQueue.push([x, y])
           }
 
           this.handleTouchMove = (e) => {
             const rect = this.canvas.getBoundingClientRect()
             const touch = e.touches[0]
-            const x = touch.clientX - rect.left
-            const y = touch.clientY - rect.top
+            const x = (touch.clientX - rect.left) * this.dpr
+            const y = (touch.clientY - rect.top) * this.dpr
             this.mouseQueue.push([x, y])
           }
 
           this.canvas.addEventListener('mousemove', this.handleMouseMove, { passive: true })
           this.canvas.addEventListener('touchmove', this.handleTouchMove, { passive: false })
 
-          // Add missing resize handler
           this.handleResize = () => {
             cancelAnimationFrame(this.animationFrameId)
+
+            this.gridManager.initGrid()
+            this.waveManager.initWaves()
+
             this.setupCanvas()
-            this.ctx && this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx && this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
             this.startAnimation()
           }
 
           window.addEventListener('resize', this.handleResize)
-          this.resizeObserver = new ResizeObserver(this.handleResize);
-          this.resizeObserver.observe(this.canvas);
+          this.resizeObserver = new ResizeObserver(this.handleResize)
+          this.resizeObserver.observe(this.canvas)
         }
 
         setupCanvas() {
           if (!this.canvas) return
 
-          const style = window.getComputedStyle(this.canvas)
-          const logicalWidth = parseFloat(style.width)
-          const logicalHeight = parseFloat(style.height)
+          void this.canvas.offsetWidth
 
-          const dpr = window.devicePixelRatio || 1
-          this.canvas.width = Math.round(logicalWidth * dpr)
-          this.canvas.height = Math.round(logicalHeight * dpr)
+          const canvasWidth = this.canvas.offsetWidth
+          const canvasHeight = this.canvas.offsetHeight
 
-          this.canvas.style.transform = 'translateZ(0)'
-          this.canvas.getBoundingClientRect()
-          
-          this.gridManager.setLogicalSize(logicalWidth, logicalHeight)
-          this.waveManager.setLogicalSize(logicalWidth, logicalHeight)
+          debug('dpr', this.dpr)
+          this.canvas.width = Math.round(canvasWidth * this.dpr)
+          this.canvas.height = Math.round(canvasHeight * this.dpr)
+
+          debug('Canvas dimensions:', {
+            offsetWidth: canvasWidth,
+            offsetHeight: canvasHeight,
+            pixelWidth: this.canvas.width,
+            pixelHeight: this.canvas.height,
+          })
+
+          // this.canvas.style.transform = 'translateZ(0)'
+          // this.canvas.getBoundingClientRect()
+
+          this.gridManager.setLogicalSize(canvasWidth, canvasHeight)
+          this.waveManager.setLogicalSize(canvasWidth, canvasHeight)
         }
 
         forceFullRedraw() {
@@ -327,7 +338,7 @@
             this.draw()
             this.animationFrameId = requestAnimationFrame(animate)
           }
-          cancelAnimationFrame(this.animationFrameId);
+          cancelAnimationFrame(this.animationFrameId)
           this.animationFrameId = requestAnimationFrame(animate)
         }
 
@@ -351,7 +362,7 @@
         }
 
         applyRadiusEffect(x, y, type) {
-          const cellSize = this.config.GRID.CELL_SIZE
+          const cellSize = this.config.GRID.CELL_SIZE * this.dpr
           const col = Math.floor(x / cellSize)
           const row = Math.floor(y / cellSize)
           const { MOUSE_INTENSITY, WAVE_INTENSITY, RADIUS, MOUSE_RADIUS } = this.config.GRID
@@ -379,7 +390,7 @@
 
         draw() {
           this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-          const cellSize = this.config.GRID.CELL_SIZE
+          const cellSize = this.config.GRID.CELL_SIZE * this.dpr
           const quantizationLevels = this.config.GRID.QUANTIZATION_LEVELS
           const opacityGroups = new Map()
 
@@ -420,7 +431,6 @@
           }
           rotate()
         }
-
       }
 
       // Astro Integration
@@ -457,10 +467,16 @@
 <style>
   canvas {
     background-color: var(--background);
-    width: 100% !important;
-    height: 100% !important;
-    transition: none !important;
-    animation: none !important;
+    width: 100%;
+    height: 100%;
+    transition: none;
+    animation: none;
+    position: relative;
+  }
+  .hero {
+    width: 100%;
+    height: 100%;
+    position: relative;
   }
   .hero::after {
     content: '';
