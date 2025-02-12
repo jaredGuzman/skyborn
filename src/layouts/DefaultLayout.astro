@@ -34,11 +34,19 @@ const {
     />
   </head>
   <body class="h-fit">
-    <Header />
-    <main id="main-content" class="w-full" transition:animate="fade">
+    <Header role="banner" />
+    <main id="main-content" class="w-full" transition:animate="fade" tabindex="-1">
       <slot />
     </main>
-    <Footer />
+    <Footer role="contentinfo" />
+
+    <div
+    id="announcer-defaultLayout"
+    class="sr-only"
+    aria-live="polite"
+    aria-atomic="true"
+    ></div>
+
     <style lang="scss" is:global>
       // theme settings
       :root {
@@ -153,6 +161,26 @@ const {
         clip: rect(0, 0, 0, 0);
         white-space: nowrap;
         border-width: 0;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--action-color);
+        outline-offset: 2px;
+      }
+
+      // Improve skip link visibility
+      .sr-only:focus-visible {
+        outline: 2px solid var(--action-color);
+        border-radius: var(--radius-small);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
       }
     </style>
   </body>

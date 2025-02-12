@@ -3,23 +3,37 @@ import { Image } from 'astro:assets'
 const { imgSrc, imgAlt = '', imgHeight = 0, imgWidth = 0, reverseImg = false } = Astro.props
 ---
 
-<div class="container flex sm:flex-col md:flex-row gap-12 items-center justify-center">
-      {
-        !reverseImg ?
-          <div class="max-h-[60vh] w-full">
-            <Image class="content-media-img m-auto rounded-lg" src={imgSrc} alt={imgAlt} height={imgHeight} width={imgWidth} />
-          </div>
-        : null
-      }
-    <div class="space-content flex flex-col justify-center">
-      <slot />
-    </div>
-      {reverseImg ?
-          <div class="max-h-[60vh] w-full">
-            <Image class="content-media-img m-auto rounded-lg" src={imgSrc} alt={imgAlt} height={imgHeight} width={imgWidth} />
-          </div>
-        : null}
-  </div>  
+<div class="container flex flex-col items-center justify-center gap-16 md:flex-row">
+  {
+    !reverseImg ? (
+      <div class="max-h-[60vh] w-full">
+        <Image
+          class="content-media-img m-auto rounded-lg"
+          src={imgSrc}
+          alt={imgAlt}
+          height={imgHeight}
+          width={imgWidth}
+        />
+      </div>
+    ) : null
+  }
+  <div class="space-content flex flex-col justify-center">
+    <slot />
+  </div>
+  {
+    reverseImg ? (
+      <div class="max-h-[60vh] w-full">
+        <Image
+          class="content-media-img m-auto rounded-lg"
+          src={imgSrc}
+          alt={imgAlt}
+          height={imgHeight}
+          width={imgWidth}
+        />
+      </div>
+    ) : null
+  }
+</div>
 
 <style>
   .content-media-img {
@@ -29,4 +43,3 @@ const { imgSrc, imgAlt = '', imgHeight = 0, imgWidth = 0, reverseImg = false } =
     width: 100%;
   }
 </style>
-
