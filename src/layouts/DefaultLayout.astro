@@ -37,10 +37,10 @@ const {
     <Header role="banner" />
     <main 
       id="main-content" 
-      class="w-full" 
-      transition:animate="fade" 
+      class="w-full relative z-1" 
+      transition:animate="slide"
       tabindex="-1"
-      style="outline: none;"
+      style="outline: none; view-transition-name: main;"
       role="main"
     >
       <slot />
@@ -189,6 +189,34 @@ const {
           transition-duration: 0.01ms !important;
           scroll-behavior: auto !important;
         }
+      }
+
+      @keyframes fade-out {
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+
+      @keyframes fade-in {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+
+      ::view-transition-old(main) {
+        animation: fade-out 0.2s ease-out both;
+        z-index: 10;
+      }
+
+      ::view-transition-new(main) {
+        animation: fade-in 0.3s ease-in both;
+        animation-delay: 0.2s;
+      }
+
+      ::view-transition-old(nav) {
+        animation: none;
+      }
+
+      ::view-transition-new(nav) {
+        animation: none;
       }
     </style>
   </body>

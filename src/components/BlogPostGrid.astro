@@ -1,5 +1,6 @@
 ---
 import ContentImage from './ContentImage.astro'
+import { Icon } from 'astro-icon/components'
 const { latestPosts } = Astro.props
 ---
 
@@ -17,7 +18,12 @@ latestPosts.map((post: any) => {
     aria-label={`Blog post: ${post.data.title}`}
     >
         <ContentImage imgSrc={post.data.thumbnail} alt={post.data.title} />
-        <h3 class="mt-4 mb-2 text-2xl italic margin-bottom !no-underline">{post.data.title}</h3>
+        <div class="flex justify-between">
+            <h3 class="mt-4 mb-2 text-2xl italic margin-bottom !no-underline">{post.data.title}</h3>
+            <div class="flex items-center">
+                <Icon name="ion:arrow-redo-circle-outline" class="w-7 h-7 mt-3" />
+            </div>
+        </div>
         <p class="break-words line-clamp-2 mb-4 !no-underline">{post.data.excerpt}</p>
     </a>
     )
