@@ -35,16 +35,24 @@ const {
   </head>
   <body class="h-fit">
     <Header role="banner" />
-    <main id="main-content" class="w-full" transition:animate="fade" tabindex="-1">
+    <main 
+      id="main-content" 
+      class="w-full" 
+      transition:animate="fade" 
+      tabindex="-1"
+      style="outline: none;"
+      role="main"
+    >
       <slot />
     </main>
     <Footer role="contentinfo" />
 
     <div
-    id="announcer-defaultLayout"
-    class="sr-only"
-    aria-live="polite"
-    aria-atomic="true"
+      id="announcer-defaultLayout"
+      class="sr-only"
+      aria-live="polite"
+      aria-atomic="true"
+      role="status"
     ></div>
 
     <style lang="scss" is:global>

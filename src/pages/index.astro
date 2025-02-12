@@ -11,10 +11,11 @@ const posts = await getBlogPosts()
 const latestPosts = posts.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()).slice(0, 5)
 ---
 
-<DefaultLayout title="Home">
-  <Hero />
+<DefaultLayout title="Home" description="Welcome to Skyborn Studios - A passionate game development team from Sacramento, CA">
+  <div class="flow-content">
+    <Hero />
 
-  <section class="home-section" aria-label="Our Origin">
+  <section class="home-section" aria-labelledby="origin-heading">
     <div class="container">
       <ContentMedia
         imgSrc="https://res.cloudinary.com/dxwistw0r/image/upload/v1738302326/landing-image_xfzb72.png"
@@ -22,8 +23,9 @@ const latestPosts = posts.sort((a, b) => new Date(b.data.date).getTime() - new D
         imgSide="right"
         imgHeight={3049}
         imgWidth={1943}
+        imgLoading="eager"
       >
-        <h2 class="text-4xl italic">Hi there!</h2>
+        <h2 id="origin-heading" class="text-4xl italic">Hi there!</h2>
         <p class="text-xl md:text-xl">
           We're Skyborn Studios, a small team of passionate game developers from Sacramento, CA.
         </p>
@@ -38,9 +40,9 @@ const latestPosts = posts.sort((a, b) => new Date(b.data.date).getTime() - new D
     </div>
   </section>
 
-  <section class="home-section" aria-label="Join Our Journey">
+  <section class="home-section" aria-labelledby="journey-heading">
     <div class="container text-center">
-      <h2 class="text-4xl">Join Our Journey</h2>
+      <h2 id="journey-heading" class="text-4xl">Join Our Journey</h2>
       <p class="mx-auto mt-8 max-w-[32rem] text-left text-xl md:text-center">
         We're building in the open! Come read our development log if you're curious about how we're building Cirrus 😊
       </p>
@@ -52,17 +54,24 @@ const latestPosts = posts.sort((a, b) => new Date(b.data.date).getTime() - new D
           <span class="i-mdi-discord text-2xl"></span>
           Discord Community
         </a> -->
-        <a href="/blog" aria-label="Development Blog" class="button">Go to Blog</a>
+        <a href="/blog" class="button">
+          <span>Go to Blog</span>
+          <span class="sr-only">Read our latest development updates</span>
+        </a>
       </div>
     </div>
   </section>
 
-  <section class="home-section">
+  <section class="home-section" aria-labelledby="blog-heading">
     <div class="container">
-      <h2 class="mb-8 text-center text-4xl italic">Blog log</h2>
-      <BlogPostGrid latestPosts={latestPosts} />
+      <h2 id="blog-heading" class="mb-8 text-center text-4xl italic">Blog log</h2>
+      <p id="blog-description" class="sr-only">
+        A collection of our {latestPosts.length} most recent blog posts about game development
+      </p>
+      <BlogPostGrid latestPosts={latestPosts} aria-describedby="blog-description" />
     </div>
   </section>
+  </div>
 </DefaultLayout>
 
 <style>
@@ -70,6 +79,11 @@ const latestPosts = posts.sort((a, b) => new Date(b.data.date).getTime() - new D
     margin: 8rem auto;
     max-width: var(--layout-max-width);
   }
+
+  .flow-content > * + * {
+    margin-top: var(--gap-default, 2rem);
+  }
+
   #blog-description {
     max-width: var(--content-max-width);
   }
