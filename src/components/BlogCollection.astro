@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content'
+
+export async function getBlogPosts() {
+  function generateExcerpt(body: string): string {
+    return (
+      body
+        .replace(/<[^>]+>/g, '') // Remove HTML tags
+        .replace(/^#+.*$/gm, '') // Remove markdown heading lines
+        .replace(/\s+/g, ' ') // Remove extra spaces
+        .trim()
+        .slice(0, 160)
+        .split(' ')
+        .slice(0, -1)
+        .join(' ') + '...'
+    )
+  }
+
+  return await getCollection('blog').then((posts) =>
+    posts.map((post) => ({
+      ...post,
+      data: {
+        ...post.data,
+        excerpt: post.data.excerpt || generateExcerpt(post.body),
+      },
+    })),
+  )
+}
+---
