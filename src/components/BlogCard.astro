@@ -1,0 +1,62 @@
+---
+interface Props {
+  post: {
+    slug: string
+    data: {
+      title: string
+      thumbnail: string
+      excerpt: string
+    }
+  }
+}
+import { Icon } from 'astro-icon/components'
+import ContentImage from './ContentImage.astro'
+
+const { post } = Astro.props
+---
+
+<a
+  href={`/blog/${post.slug}`}
+  class="card post-item block !no-underline transition-opacity duration-300 hover:opacity-75"
+  aria-label={`Blog post: ${post.data.title}`}
+>
+  <ContentImage imgSrc={post.data.thumbnail} alt={post.data.title} />
+  <div class="card__content flex justify-between">
+    <h3 class="margin-bottom mb-2 mt-4 text-2xl italic !no-underline">{post.data.title}</h3>
+    <div class="flex items-center">
+      <Icon name="ion:arrow-redo-circle-outline" class="mt-3 h-7 w-7" />
+    </div>
+  </div>
+  <p class="mb-4 line-clamp-2 break-words !no-underline">{post.data.excerpt}</p>
+</a>
+
+<style is:global>
+  .card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.15s ease-in-out;
+    border: 2px solid black;
+    border-radius: 0.5rem;
+    max-width: 60ch;
+  }
+
+  .card:hover,
+  .card:focus-within {
+    box-shadow: 0 0 0 0.25rem;
+  }
+
+  .card:focus-within a:focus {
+    text-decoration: none;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .card__content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 1rem;
+  }
+</style>

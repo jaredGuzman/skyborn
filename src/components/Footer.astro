@@ -1,11 +1,10 @@
 ---
-import ThemeToggle from "./ThemeToggle.astro"
+import ThemeToggle from './ThemeToggle.astro'
 const currentYear = new Date().getFullYear()
 ---
 
-<footer class="inset-shadow-md w-full">
+<footer class="inset-shadow-md xs:py-4 w-full sm:py-8">
   <div class="container">
-
     <!-- Footer Columns -->
     <div class="footer-content">
       <div class="company-info flex flex-col items-center">
@@ -46,7 +45,7 @@ const currentYear = new Date().getFullYear()
 
     <div class="dark-mode">
       <ThemeToggle />
-      </div>
+    </div>
     <!-- Copyright -->
     <div class="copyright">
       <p class="footer-text">&copy; {currentYear} Skyborn Studios. All rights reserved.</p>
@@ -63,85 +62,84 @@ const currentYear = new Date().getFullYear()
   }
 
   footer {
-  padding: 4rem 0 2rem 0;
-  background: var(--background);
-  
-  .container {
-    max-width: var(--container-max-width, 1200px);
-    margin: 0 auto;
-    padding-left: 4rem;
-    padding-right: 4rem;
-    padding-bottom: 0 var(--container-padding, 1rem);
-    padding-top: 0 var(--container-padding, 1rem);
-  }
+    background: var(--background);
 
-  .footer-content {
-    display: grid;
-    gap: 3rem;
-    
-    @include breakpoint(medium) {
-      grid-template-columns: 1fr 2fr;
+    .container {
+      max-width: var(--container-max-width, 1200px);
+      margin: 0 auto;
+      padding-left: 4rem;
+      padding-right: 4rem;
+      padding-bottom: 0 var(--container-padding, 1rem);
+      padding-top: 0 var(--container-padding, 1rem);
     }
 
-    .company-info {
-      h3 {
-        margin-bottom: 0.5rem;
-        font-size: 1.5rem;
-      }
-      
-      p {
-        max-width: 25ch;
-        opacity: 0.8;
-      }
-    }
-  }
+    .footer-content {
+      display: grid;
+      gap: 3rem;
 
-  .footer-nav {
-    display: grid;
-    gap: 2rem;
-    
-    @include breakpoint(medium) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .nav-column {
-      h3 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        font-weight: 600;
+      @include breakpoint(medium) {
+        grid-template-columns: 1fr 2fr;
       }
 
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        
-        li {
+      .company-info {
+        h3 {
           margin-bottom: 0.5rem;
+          font-size: 1.5rem;
+        }
 
-          a {
-            opacity: 0.8;
-            transition: opacity 0.2s;
-            
-            &:hover {
-              opacity: 1;
+        p {
+          max-width: 25ch;
+          opacity: 0.8;
+        }
+      }
+    }
+
+    .footer-nav {
+      display: grid;
+      gap: 2rem;
+
+      @include breakpoint(medium) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .nav-column {
+        h3 {
+          font-size: 1.5rem;
+          margin-bottom: 1rem;
+          font-weight: 600;
+        }
+
+        ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            margin-bottom: 0.5rem;
+
+            a {
+              opacity: 0.8;
+              transition: opacity 0.2s;
+
+              &:hover {
+                opacity: 1;
+              }
             }
           }
         }
       }
     }
-  }
-  .dark-mode {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-  }
+    .dark-mode {
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
 
-  .copyright {
-    margin-top: 4rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--neutral-200);
-    text-align: center;
-    opacity: 0.8;
+    .copyright {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--neutral-200);
+      text-align: center;
+      opacity: 0.8;
+    }
   }
-}
 </style>

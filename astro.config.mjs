@@ -6,6 +6,7 @@ import icon from 'astro-icon'
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://skybornstudios.com',
   compressHTML: true,
   integrations: [mdx(), icon(), tailwind({
     applyBaseStyles: false,
@@ -15,7 +16,7 @@ export default defineConfig({
       preprocessorOptions: {
         scss: {
           logger: {
-            warn: () => {},
+            warn: () => { },
           },
         },
       },

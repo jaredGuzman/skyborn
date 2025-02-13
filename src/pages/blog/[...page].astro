@@ -1,25 +1,30 @@
 ---
 import BlogLayout from '../../layouts/BlogLayout.astro'
-import { Card, Pagination } from 'accessible-astro-components'
+import Pagination from '../../components/Pagination.astro'
+import BlogCard from '../../components/BlogCard.astro'
+import type { GetStaticPaths } from 'astro'
 
-export async function getStaticPaths({ paginate }) {
-  // Import all blog posts from the content collection
-  const posts = await Astro.glob('../../content/blog/*.md');
-  
-  // Sort posts by date if you have a date field in your frontmatter
-  const sortedPosts = posts.sort((a: any, b: any) => {
-    return new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime();
-  });
+import { getBlogPosts } from '../../components/BlogCollection.astro'
+
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+  const posts = await getBlogPosts()
+
+  // Sort posts by date using the correct data structure
+  const sortedPosts = posts.sort((a, b) => {
+    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+  })
 
   // Transform the posts to match your blog structure
-  const transformedPosts = sortedPosts.map((post: any) => ({
-    ...post.frontmatter,
-    content: post.compiledContent(),
-    url: `/blog/${post.frontmatter.slug || post.file.split('/').pop().replace('.md', '')}`,
-    slug: post.frontmatter.slug || post.file.split('/').pop().replace('.md', '')
-  }));
+  const transformedPosts = sortedPosts.map((post) => ({
+    slug: post.slug,
+    data: {
+      title: post.data.title,
+      thumbnail: post.data.thumbnail,
+      excerpt: post.data.excerpt,
+    },
+  }))
 
-  return paginate(transformedPosts, { pageSize: 6 });
+  return paginate(transformedPosts, { pageSize: 6 })
 }
 
 const { page } = Astro.props
@@ -39,14 +44,7 @@ const { page } = Astro.props
         {
           page.data.map((post) => (
             <li>
-              <Card
-                url={post.url}
-                title={post.title}
-                img={post.thumbnail}
-                footer={post.date}
-              >
-                {post.body}
-              </Card>
+              <BlogCard post={post} />
             </li>
           ))
         }

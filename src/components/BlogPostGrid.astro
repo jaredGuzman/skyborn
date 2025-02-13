@@ -1,38 +1,23 @@
 ---
-import ContentImage from './ContentImage.astro'
-import { Icon } from 'astro-icon/components'
+import BlogCard from './BlogCard.astro'
 const { latestPosts } = Astro.props
 ---
 
-<div 
-id="blog-grid" 
-role="feed"
-aria-label="Blog posts grid"
-class="grid grid-cols-1 gap-12 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-{
-latestPosts.map((post: any) => {
-    return (
-    <a 
-    href={`/blog/${post.slug}`} 
-    class="post-item hidden block hover:opacity-75 transition-opacity duration-300 !no-underline"
-    aria-label={`Blog post: ${post.data.title}`}
-    >
-        <ContentImage imgSrc={post.data.thumbnail} alt={post.data.title} />
-        <div class="flex justify-between">
-            <h3 class="mt-4 mb-2 text-2xl italic margin-bottom !no-underline">{post.data.title}</h3>
-            <div class="flex items-center">
-                <Icon name="ion:arrow-redo-circle-outline" class="w-7 h-7 mt-3" />
-            </div>
-        </div>
-        <p class="break-words line-clamp-2 mb-4 !no-underline">{post.data.excerpt}</p>
-    </a>
-    )
-})
-}
+<div
+  id="blog-grid"
+  role="feed"
+  aria-label="Blog posts grid"
+  class="grid grid-cols-1 gap-12 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+>
+  {
+    latestPosts.map((post: any) => {
+      return <BlogCard post={post} />
+    })
+  }
 </div>
 
 <script>
-    function updateVisiblePosts() {
+  function updateVisiblePosts() {
     const grid = document.getElementById('blog-grid')
     if (!grid) return
 
@@ -41,40 +26,40 @@ latestPosts.map((post: any) => {
 
     const width = window.innerWidth
     if (width >= 1280)
-        visibleColumns = 5 // xl
+      visibleColumns = 5 // xl
     else if (width >= 1024)
-        visibleColumns = 4 // lg
+      visibleColumns = 4 // lg
     else if (width >= 768)
-        visibleColumns = 3 // md
+      visibleColumns = 3 // md
     else visibleColumns = 1
 
     const computedStyle = window.getComputedStyle(grid)
     const columns = computedStyle.gridTemplateColumns.split(' ').length
 
     posts.forEach((post, index) => {
-        if (index < visibleColumns) {
+      if (index < visibleColumns) {
         post.classList.remove('hidden')
-        } else {
+      } else {
         post.classList.add('hidden')
-        }
+      }
     })
+  }
+
+  function setupGridListeners() {
+    window.removeEventListener('resize', updateVisiblePosts)
+    window.removeEventListener('load', updateVisiblePosts)
+
+    window.addEventListener('resize', updateVisiblePosts)
+    // Instead of 'load', use 'DOMContentLoaded' or immediate execution
+    updateVisiblePosts() // Run immediately
+  }
+
+  document.addEventListener('astro:page-load', setupGridListeners, { once: false })
+
+  // Also run setup when the document becomes visible again
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      setupGridListeners()
     }
-
-    function setupGridListeners() {
-        window.removeEventListener('resize', updateVisiblePosts)
-        window.removeEventListener('load', updateVisiblePosts)
-
-        window.addEventListener('resize', updateVisiblePosts)
-        // Instead of 'load', use 'DOMContentLoaded' or immediate execution
-        updateVisiblePosts() // Run immediately
-    }
-
-    document.addEventListener('astro:page-load', setupGridListeners, { once: false })
-
-    // Also run setup when the document becomes visible again
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            setupGridListeners()
-        }
-    })
+  })
 </script>

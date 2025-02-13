@@ -35,25 +35,17 @@ const {
   </head>
   <body class="h-fit">
     <Header role="banner" />
-    <main 
-      id="main-content" 
-      class="w-full relative z-1" 
+    <main
+      id="main-content"
+      class="z-1 relative w-full"
       transition:animate="slide"
-      tabindex="-1"
       style="outline: none; view-transition-name: main;"
-      role="main"
     >
       <slot />
     </main>
     <Footer role="contentinfo" />
 
-    <div
-      id="announcer-defaultLayout"
-      class="sr-only"
-      aria-live="polite"
-      aria-atomic="true"
-      role="status"
-    ></div>
+    <div id="announcer-defaultLayout" class="sr-only" aria-live="polite" aria-atomic="true" role="status"></div>
 
     <style lang="scss" is:global>
       // theme settings
@@ -192,13 +184,21 @@ const {
       }
 
       @keyframes fade-out {
-        0% { opacity: 1; }
-        100% { opacity: 0; }
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
       }
 
       @keyframes fade-in {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
       }
 
       ::view-transition-old(main) {
