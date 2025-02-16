@@ -9,18 +9,19 @@ interface Props {
     }
   }
 }
+
 import { Icon } from 'astro-icon/components'
-import ContentImage from './ContentImage.astro'
+import BlogCardImage from './BlogCardImage.astro'
 
 const { post } = Astro.props
 ---
 
 <a
   href={`/blog/${post.slug}`}
-  class="card post-item block !no-underline transition-opacity duration-300 hover:opacity-75"
+  class="post-item block !no-underline !outline-none transition-opacity duration-300 hover:opacity-75"
   aria-label={`Blog post: ${post.data.title}`}
 >
-  <ContentImage imgSrc={post.data.thumbnail} alt={post.data.title} />
+  <BlogCardImage imgSrc={post.data.thumbnail} alt={post.data.title} />
   <div class="card__content flex justify-between">
     <h3 class="margin-bottom mb-2 mt-4 text-2xl italic !no-underline">{post.data.title}</h3>
     <div class="flex items-center">
@@ -37,8 +38,6 @@ const { post } = Astro.props
     position: relative;
     overflow: hidden;
     transition: box-shadow 0.15s ease-in-out;
-    border: 2px solid black;
-    border-radius: 0.5rem;
     max-width: 60ch;
   }
 

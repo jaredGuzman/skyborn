@@ -1,0 +1,32 @@
+---
+import { Image } from 'astro:assets'
+const { imgSrc, imgAlt = '', fallbackImgSrc = '/image/fallback-gato_muestra.gif', loading = 'eager' } = Astro.props
+---
+
+<div class="relative w-full">
+  <Image class="content-media-img w-full" src={imgSrc} alt={imgAlt} inferSize loading={loading} />
+  <div class="color-overlay absolute inset-0"></div>
+</div>
+
+<script define:vars={{ fallbackImgSrc, imgSrc }} is:inline>
+  document.querySelector('.content-media-img')?.addEventListener('error', () => {
+    if (fallbackImgSrc) {
+      document.querySelector('.content-media-img').src = fallbackImgSrc
+    }
+  })
+</script>
+
+<style>
+  .content-media-img {
+    object-fit: cover;
+    height: 100%;
+    max-height: 8rem;
+    width: 100%;
+  }
+
+  .color-overlay {
+    background-color: rgb(79, 99, 55);
+    mix-blend-mode: multiply;
+    opacity: 0.7;
+  }
+</style>
