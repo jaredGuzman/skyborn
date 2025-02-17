@@ -6,22 +6,37 @@ const { title, description, date, url, image, isPost = false } = Astro.props
 ---
 
 <DefaultLayout title={title}>
-  <article class="container">
+  <article class="flex flex-col items-center gap-4">
     {
       isPost && (
-        <div>
+        <div class="content flex flex-col justify-center gap-4">
           {image && (
-            <div class="mb-8 h-64 w-full">
+            <div class="h-full w-full">
               <ContentImage imgSrc={image} imgAlt={title} />
             </div>
           )}
-          <h1>{title}</h1>
-          {date ? <time datetime={date}>{new Date(date).toLocaleDateString()}</time> : 'No date'}
+          <h1 class="z-10 mx-4 mt-[-5rem] italic text-neutral-100">{title ? title : 'No title'}</h1>
+          {date ? (
+            <div class="mx-4">
+              <span class="text-sm italic text-neutral-600">Published on: </span>
+              <time datetime={date} class="text-sm italic text-neutral-600">
+                {new Date(date).toLocaleDateString()}
+              </time>
+            </div>
+          ) : (
+            'No date'
+          )}
         </div>
       )
     }
-    <div class="prose mt-8 max-w-none">
+    <div class="content mx-4">
       <slot />
     </div>
   </article>
 </DefaultLayout>
+
+<style lang="scss">
+  .content {
+    max-width: var(--content-max-width);
+  }
+</style>

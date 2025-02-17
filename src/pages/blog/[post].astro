@@ -13,6 +13,7 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props
 const { Content } = await post.render()
+console.log(post)
 ---
 
 <BlogLayout
@@ -23,16 +24,16 @@ const { Content } = await post.render()
   date={post.data.date}
   image={post.data.thumbnail}
 >
-  <div class="container">
-    <div class="mt-12">
-      <Breadcrumbs>
-        <BreadcrumbsItem href="/" label="Home" />
-        <BreadcrumbsItem href="/blog" label="Blog" />
-        <BreadcrumbsItem currentPage={true} label={post.data.title} />
-      </Breadcrumbs>
-    </div>
+  <div class="my-2 mb-8 text-sm italic text-neutral-600">
+    <Breadcrumbs>
+      <BreadcrumbsItem href="/" label="Home" />
+      <BreadcrumbsItem href="/blog" label="Blog" />
+      <BreadcrumbsItem currentPage={true} label={post.data.title} />
+    </Breadcrumbs>
   </div>
-  <Content />
+  <div class="blog-content">
+    <Content />
+  </div>
 </BlogLayout>
 
 <style lang="scss">
@@ -48,6 +49,33 @@ const { Content } = await post.render()
 
     @media (min-width: 950px) {
       grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .blog-content {
+    :global(> h1),
+    :global(> h2),
+    :global(> h3),
+    :global(> h4),
+    :global(> h5),
+    :global(> h6),
+    :global(> p),
+    :global(> ul),
+    :global(> ol),
+    :global(> blockquote) {
+      margin-bottom: 1rem;
+    }
+
+    :global(> ul),
+    :global(> ol) {
+      margin-left: 1.5rem;
+      display: block;
+    }
+
+    :global(> blockquote) {
+      margin-left: 1rem;
+      padding-left: 1rem;
+      border-left: 3px solid var(--action-color);
     }
   }
 </style>
