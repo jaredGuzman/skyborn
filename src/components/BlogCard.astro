@@ -22,7 +22,7 @@ const { post } = Astro.props
   aria-label={`Blog post: ${post.data.title}`}
 >
   <BlogCardImage imgSrc={post.data.thumbnail} alt={post.data.title} />
-  <div class="card__content flex justify-between">
+  <div class="!flex !justify-between">
     <h3 class="margin-bottom mb-2 mt-4 text-2xl italic !no-underline">{post.data.title}</h3>
     <div class="flex items-center">
       <Icon name="ion:arrow-redo-circle-outline" class="mt-3 h-7 w-7" />

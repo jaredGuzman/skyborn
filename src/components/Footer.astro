@@ -3,13 +3,13 @@ import ThemeToggle from './ThemeToggle.astro'
 const currentYear = new Date().getFullYear()
 ---
 
-<footer class="inset-shadow-md xs:py-4 w-full sm:py-8">
+<footer class="inset-shadow-md xs:py-4 mt-8 w-full sm:py-8">
   <div class="container">
     <!-- Footer Columns -->
     <div class="footer-content">
       <div class="company-info flex flex-col items-center">
         <h3 class="footer-text">Skyborn Studios</h3>
-        <p class="footer-text">Independent game development studio building games for the love of it.</p>
+        <p class="footer-text text-left">Independent game development studio building games for the love of it.</p>
       </div>
 
       <nav class="footer-nav">
@@ -96,7 +96,7 @@ const currentYear = new Date().getFullYear()
 
     .footer-nav {
       display: grid;
-      gap: 2rem;
+      gap: 1rem;
 
       @include breakpoint(medium) {
         grid-template-columns: repeat(3, 1fr);
@@ -130,12 +130,12 @@ const currentYear = new Date().getFullYear()
       }
     }
     .dark-mode {
-      margin-top: 2rem;
-      margin-bottom: 2rem;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
     }
 
     .copyright {
-      margin-top: 4rem;
+      margin-top: 1rem;
       padding-top: 2rem;
       border-top: 1px solid var(--neutral-200);
       text-align: center;
