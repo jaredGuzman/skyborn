@@ -18,7 +18,7 @@ const latestPosts = posts.sort((a, b) => new Date(b.data.date).getTime() - new D
   <div class="flow-content">
     <Hero />
 
-    <section class="home-section" aria-labelledby="origin-heading">
+    <section class="home-section !mt-0" aria-labelledby="origin-heading">
       <div class="container">
         <ContentMedia
           imgSrc="https://res.cloudinary.com/dxwistw0r/image/upload/v1738302326/landing-image_xfzb72.png"
@@ -65,7 +65,7 @@ const latestPosts = posts.sort((a, b) => new Date(b.data.date).getTime() - new D
       </div>
     </section>
 
-    <section class="home-section" aria-labelledby="blog-heading">
+    <section class="home-section !mb-0" aria-labelledby="blog-heading">
       <div class="container">
         <h2 id="blog-heading" class="mb-8 text-center text-4xl italic">Blog log</h2>
         <p id="blog-description" class="sr-only">
@@ -79,7 +79,7 @@ const latestPosts = posts.sort((a, b) => new Date(b.data.date).getTime() - new D
 
 <style>
   .home-section {
-    margin: 4rem auto !important;
+    margin: 8rem auto;
     max-width: var(--layout-max-width);
   }
 

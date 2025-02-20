@@ -1,0 +1,62 @@
+---
+description: Prioritize Existing Code and Libraries
+globs: *.ts, *.js, *.astro
+---
+---
+description: Prioritize Existing Code and Libraries
+globs: ["*.ts", "*.js", "*.astro"]
+---
+# Use Existing Code and Libraries
+
+Standards for utilizing existing code and libraries before adding new dependencies.
+
+<rule>
+name: prioritize_existing_code
+description: Prioritize using existing code and libraries before adding new dependencies
+
+filters:
+  - type: content
+    pattern: "(?i)(npm install|yarn add|pnpm add)"
+  - type: content
+    pattern: "import.*from.*(?!astro:|@astrojs/)"
+
+actions:
+  - type: suggest
+    message: |
+      Before adding new dependencies, consider:
+
+      1. Using built-in Astro features and components:
+         - Astro.glob()
+         - <Image /> from astro:assets
+         - Content Collections API
+         - Built-in markdown support
+
+      2. Leveraging existing project code:
+         - Check src/components/ for reusable components
+         - Review src/utils/ for utility functions
+         - Use existing styling solutions (Tailwind/CSS)
+
+      3. Using official Astro integrations:
+         - @astrojs/image
+         - @astrojs/mdx
+         - @astrojs/tailwind
+         - Other official integrations
+
+      Only add new dependencies when:
+      - Required functionality isn't available in Astro
+      - Can't be implemented simply with existing code
+      - Benefits clearly outweigh maintenance costs
+
+examples:
+  - input: |
+      npm install some-markdown-library
+      import { parse } from 'some-markdown-library'
+    output: |
+      // Use Astro's built-in markdown support
+      import { getCollection } from 'astro:content'
+      const posts = await getCollection('blog')
+
+metadata:
+  priority: high
+  impact: maintainability
+</rule>
